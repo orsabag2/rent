@@ -18,418 +18,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" xintegrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body class="text-gray-800 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 sm:p-10 pb-24"> 
-        <header class="mb-6 text-center">
-             <svg class="icon-lg lemonade-pink mx-auto mb-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9.5L12 4L21 9.5V20C21 20.2652 20.8946 20.5196 20.7071 20.7071C20.5196 20.8946 20.2652 21 20 21H4C3.73478 21 3.48043 20.8946 3.29289 20.7071C3.10536 20.5196 3 20.2652 3 20V9.5Z" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V13H15V21" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <h1 class="text-2xl sm:text-3xl font-bold lemonade-pink">יצירת חוזה שכירות דירה</h1>
-            <p class="text-gray-500 mt-1 text-md">מלאו את הפרטים שלב אחר שלב, עבור הנכס שברצונכם להשכיר.</p>
-        </header>
+    <header class="mb-6 text-center">
+        <h1 class="text-2xl sm:text-3xl font-bold lemonade-pink">יצירת חוזה שכירות דירה</h1>
+        <p class="text-gray-500 mt-1 text-md">מלאו את הפרטים שלב אחר שלב, עבור הנכס שברצונכם להשכיר.</p>
+    </header>
+    <div class="content-wrapper">
+        <div class="main-layout flex w-full max-w-6xl mx-auto space-x-8">
+            <div class="sidebar-progress-container w-64 flex-shrink-0">
+                <div id="progressBarSections" class="flex flex-col space-y-4"></div>
+            </div>
 
-        <div class="progress-bar-container">
-            <div id="progressBar" class="progress-bar"></div>
+            <div class="w-full rounded-xl p-6 sm:p-10 pb-24">
+                <div class="progress-bar-container hidden">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+
+                <form id="rentalContractForm">
+                    <div id="formStepsContainer">
+                    </div>
+                    
+                    <!-- Navigation buttons (outside form-step, but inside form) -->
+                    <div id="navigationContainer" class="flex justify-between items-center mt-8">
+                        <button type="button" id="prevBtn" class="btn btn-secondary">
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M15 5l7 7-7 7"></path></svg>
+                            <span>הקודם</span>
+                        </button>
+                        <button type="button" id="nextBtn" class="btn btn-primary">
+                            <span>הבא</span>
+                            <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M9 5l-7 7 7 7"></path></svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <form id="rentalContractForm">
-            <!-- Step 1: Property Details -->
-            <div class="form-step active" data-step="1">
-                <h2 class="step-title">
-                    <svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9.5L12 4L21 9.5V20C21 20.2652 20.8946 20.5196 20.7071 20.7071C20.5196 20.8946 20.2652 21 20 21H4C3.73478 21 3.48043 20.8946 3.29289 20.7071C3.10536 20.5196 3 20.2652 3 20V9.5Z" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V13H15V21" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    פרטי הנכס
-                </h2>
-                <p class="step-subtitle">נא הזן את פרטי הנכס המיועד להשכרה.</p>
-                <div class="space-y-6">
-                    <div>
-                        <label for="propertyAddress">כתובת מלאה של הנכס</label>
-                        <input type="text" id="propertyAddress" name="propertyAddress" placeholder="עיר, רחוב, מספר בית, דירה">
-                    </div>
-                    <div>
-                        <label>סוג הנכס</label>
-                        <div class="choice-button-group" data-field-name="propertyType">
-                            <button type="button" class="choice-button selected" data-value="דירה"> <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>דירה</button>
-                            <button type="button" class="choice-button" data-value="בית פרטי"> <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>בית פרטי</button>
-                            <button type="button" class="choice-button" data-value="יחידת דיור"> <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6V9a6 6 0 016 6v1z"></path></svg>יחידת דיור</button>
-                            <button type="button" class="choice-button" data-value="אחר">אחר</button>
-                        </div>
-                        <input type="hidden" name="propertyType" id="propertyType" value="דירה">
-                        <input type="text" id="propertyTypeOther" name="propertyTypeOther" placeholder="נא פרט את סוג הנכס..." class="mt-2 w-full hidden">
-                    </div>
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                        <div>
-                            <div class="slider-label-group">
-                                <label for="propertyRooms">מספר חדרים (1-10)</label>
-                                <span id="propertyRoomsValue" class="slider-value">4</span>
-                            </div>
-                            <input type="range" id="propertyRooms" name="propertyRooms" min="1" max="10" value="4" class="w-full slider-container">
-                        </div>
-                        <div>
-                            <div class="slider-label-group">
-                                <label for="propertySize">גודל במ"ר (20-300)</label>
-                                <span id="propertySizeValue" class="slider-value">75</span>
-                            </div>
-                            <input type="range" id="propertySize" name="propertySize" min="20" max="300" value="75" step="5" class="w-full slider-container">
-                        </div>
-                    </div>
-                     <div>
-                        <label>ריהוט ואביזרים הנשארים בנכס (אם יש)</label>
-                        <div class="choice-button-group" data-field-name="furnitureItems" data-multiselect="true">
-                            <button type="button" class="choice-button" data-value="מזגן"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v2.586l-1.707-1.707a1 1 0 00-1.414 1.414L8.586 10l-1.707 1.707a1 1 0 101.414 1.414L10 11.414l1.707 1.707a1 1 0 101.414-1.414L11.414 10l1.707-1.707a1 1 0 00-1.414-1.414L10 7.414V5z" clip-rule="evenodd" /></svg>מזגן</button>
-                            <button type="button" class="choice-button" data-value="ארונות קיר"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1H4a1 1 0 00-1 1v2a1 1 0 001 1h12a1 1 0 001-1V6a1 1 0 00-1-1zM2 13a2 2 0 012-2h6a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 0a2 2 0 012-2h-2a2 2 0 01-2 2v2a2 2 0 012 2h2a2 2 0 01-2-2v-2z" /></svg>ארונות קיר</button>
-                            <button type="button" class="choice-button" data-value="מכונת כביסה"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v11a1 1 0 100 2h14a1 1 0 100-2V5a1 1 0 000-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 6.707 6.293a1 1 0 00-1.414 1.414L8.586 11l-3.293 3.293a1 1 0 101.414 1.414L10 12.414l3.293 3.293a1 1 0 001.414-1.414L11.414 11l3.293-3.293z" clip-rule="evenodd" /></svg>מכונת כביסה</button>
-                            <button type="button" class="choice-button" data-value="מקרר"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3a1 1 0 011-1h14a1 1 0 011 1v3a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm16 5H2v10a1 1 0 001 1h14a1 1 0 001-1V8zm-3 2a1 1 0 100 2h.01a1 1 0 100-2H15zm-4 0a1 1 0 100 2h.01a1 1 0 100-2H11z" clip-rule="evenodd" /></svg>מקרר</button>
-                            <button type="button" class="choice-button" data-value="תנור אפיה"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 7a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 017 7zm0 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 017 10zm0 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>תנור</button>
-                            <button type="button" class="choice-button" data-value="כיריים"><svg class="icon-sm mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.5a1.5 1.5 0 011.018 2.668l1.94 2.91A2.5 2.5 0 0112 11.75V13a1 1 0 11-2 0v-1.25a2.5 2.5 0 01-.958-1.672l1.94-2.91A1.5 1.5 0 0110 3.5zM10 5c-.25 0-.488.132-.636.364L7.5 8.275A1.5 1.5 0 008.43 10.5h3.14a1.5 1.5 0 00.93-2.225L10.636 5.364A.752.752 0 0010 5z" /><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" /></svg>כיריים</button>
-                        </div>
-                        <input type="hidden" name="furnitureItems" id="furnitureItems">
-                        <textarea id="propertyDescription" name="propertyDescription" rows="2" placeholder="תיאור נוסף של מצב הנכס או פריטים אחרים..." class="mt-2 w-full"></textarea>
-                    </div>
-                    <div>
-                        <label>ליקויים ידועים בנכס (שהשוכר עודכן לגביהם)?</label>
-                        <div class="choice-button-group" data-field-name="knownDefects">
-                             <button type="button" class="choice-button selected" data-value="לא">לא, הנכס תקין</button>
-                             <button type="button" class="choice-button" data-value="כן">כן, ישנם ליקויים</button>
-                        </div>
-                        <input type="hidden" name="knownDefects" id="knownDefects" value="לא">
-                        <textarea id="defectsDetails" name="defectsDetails" rows="2" placeholder="אם כן, נא פרט את הליקויים שסוכמו..." class="mt-2 w-full hidden"></textarea>
-                    </div>
-                </div>
-            </div>
-            <!-- Step 2: Landlord Details -->
-            <div class="form-step" data-step="2">
-                <h2 class="step-title"> <svg class="icon-md lemonade-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path></svg> פרטיך כמשכיר</h2>
-                 <div class="space-y-6">
-                    <div> <label for="landlordName">שם מלא</label> <input type="text" id="landlordName" name="landlordName"> </div>
-                    <div> <label for="landlordId">מספר ת.ז.</label> <input type="text" id="landlordId" name="landlordId"> </div>
-                    <div> <label for="landlordPhone">טלפון</label> <input type="tel" id="landlordPhone" name="landlordPhone"> </div>
-                    <div> <label for="landlordEmail">דוא"ל</label> <input type="email" id="landlordEmail" name="landlordEmail"> </div>
-                </div>
-            </div>
-            <!-- Step 3: Tenant Details -->
-            <div class="form-step" data-step="3">
-                <h2 class="step-title"><svg class="icon-md lemonade-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"></path></svg> פרטי השוכר/ים</h2>
-                <div class="space-y-6">
-                    <div> <label for="tenantName">שם מלא</label> <input type="text" id="tenantName" name="tenantName"> </div>
-                    <div> <label for="tenantId">מספר ת.ז.</label> <input type="text" id="tenantId" name="tenantId"> </div>
-                    <div> <label for="tenantPhone">טלפון</label> <input type="tel" id="tenantPhone" name="tenantPhone"> </div>
-                    <div> <label for="tenantEmail">דוא"ל</label> <input type="email" id="tenantEmail" name="tenantEmail"> </div>
-                </div>
-            </div>
-            <!-- Step 4: Rental Terms -->
-            <div class="form-step" data-step="4">
-                <h2 class="step-title"><svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg> תנאי השכירות</h2>
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
-                        <div><label for="startDate">תאריך תחילת שכירות</label><input type="date" id="startDate" name="startDate"></div>
-                        <div><label for="endDate">תאריך סיום שכירות</label><input type="date" id="endDate" name="endDate"></div>
-                    </div>
-                    <div> <label>אופציה להארכת החוזה?</label> <div class="choice-button-group" data-field-name="hasOption"> <button type="button" class="choice-button selected" data-value="לא">לא</button> <button type="button" class="choice-button" data-value="כן">כן</button> </div> <input type="hidden" name="hasOption" id="hasOption" value="לא"> </div>
-                    <div id="optionDetails" class="space-y-4 hidden mt-4 border-t pt-4">
-                        <div> <div class="slider-label-group"> <label for="optionDuration">משך האופציה (חודשים)</label> <span id="optionDurationValue" class="slider-value">12</span> </div> <input type="range" id="optionDuration" name="optionDuration" min="1" max="24" value="12" class="w-full slider-container"> </div>
-                        <div> <div class="slider-label-group"> <label for="optionNotice">הודעה מראש (ימים)</label> <span id="optionNoticeValue" class="slider-value">60</span> </div> <input type="range" id="optionNotice" name="optionNotice" min="30" max="120" value="60" step="15" class="w-full slider-container"> </div>
-                        <div> <label>דמי שכירות באופציה</label> <div class="choice-button-group" data-field-name="optionRentTerms"> <button type="button" class="choice-button selected" data-value="ללא שינוי">ללא שינוי</button> <button type="button" class="choice-button" data-value="עלייה באחוזים">עלייה באחוזים</button> <button type="button" class="choice-button" data-value="סכום חדש">סכום חדש</button> </div> <input type="hidden" name="optionRentTerms" id="optionRentTerms" value="ללא שינוי"> <input type="number" id="optionRentPercentage" name="optionRentPercentage" placeholder="אחוז עלייה" class="mt-2 w-full hidden"> <input type="number" id="optionRentNewAmount" name="optionRentNewAmount" placeholder="סכום חדש" class="mt-2 w-full hidden"> </div>
-                    </div>
-                    <div> <label for="monthlyRent">דמי שכירות חודשיים (בש"ח)</label> <input type="number" id="monthlyRent" name="monthlyRent" placeholder="לדוגמה: 4500" min="0"> <input type="hidden" name="rentCurrency" id="rentCurrency" value="ILS"> </div>
-                    <div> <div class="slider-label-group"> <label for="paymentDueDate">יום תשלום בחודש</label> <span id="paymentDueDateValue" class="slider-value">1</span> </div> <input type="range" id="paymentDueDate" name="paymentDueDate" min="1" max="28" value="1" class="w-full slider-container"> </div>
-                    <div> <label>אמצעי תשלום</label> <div class="choice-button-group" data-field-name="paymentMethod"> <button type="button" class="choice-button selected" data-value="העברה בנקאית">העברה בנקאית</button> <button type="button" class="choice-button" data-value="צ'קים">צ'קים</button> <button type="button" class="choice-button" data-value="הוראת קבע">הוראת קבע</button> <button type="button" class="choice-button" data-value="אחר">אחר</button> </div> <input type="hidden" name="paymentMethod" id="paymentMethod" value="העברה בנקאית"> <input type="text" id="paymentMethodOther" name="paymentMethodOther" placeholder="פרט..." class="mt-2 w-full hidden"> </div>
-                </div>
-            </div>
-             <!-- Step 5: Securities -->
-            <div class="form-step" data-step="5">
-                 <h2 class="step-title">
-                     <svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5V11C3 16.5228 7.02944 21 12 23C16.9706 21 21 16.5228 21 11V5L12 1Z" stroke="currentColor" class="path-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    ערבויות ובטחונות
-                </h2>
-                 <p class="step-subtitle">הסדרת בטחונות להבטחת תנאי החוזה.</p>
-                 <div class="space-y-6">
-                    <div>
-                        <label>סוגי בטחונות מהשוכר (ניתן לבחור יותר מאחד)</label>
-                         <div class="choice-button-group" data-field-name="securityDepositType" data-multiselect="true">
-                            <button type="button" class="choice-button" data-value="צ'ק ביטחון">צ'ק ביטחון</button>
-                            <button type="button" class="choice-button" data-value="ערבות בנקאית">ערבות בנקאית</button>
-                            <button type="button" class="choice-button" data-value="שטר חוב">שטר חוב</button>
-                            <button type="button" class="choice-button" data-value="פיקדון כספי">פיקדון כספי</button>
-                            <button type="button" class="choice-button" data-value="ערבים">ערבים</button>
-                        </div>
-                        <input type="hidden" name="securityDepositType" id="securityDepositType">
-                    </div>
-                    <div>
-                        <label for="securityDepositAmount">סכום ערבון כולל/עיקרי (בש"ח)</label>
-                        <input type="number" id="securityDepositAmount" name="securityDepositAmount" placeholder="סכום כולל" min="0">
-                    </div>
-                     <div id="guarantorsSection" class="hidden">
-                        <div class="slider-label-group">
-                            <label for="numberOfGuarantors">מספר ערבים (1-3)</label>
-                            <span id="numberOfGuarantorsValue" class="slider-value">2</span>
-                        </div>
-                        <input type="range" id="numberOfGuarantors" name="numberOfGuarantors" min="1" max="3" value="2" class="w-full slider-container">
-                    </div>
-                 </div>
-            </div>
-            <!-- Step 6: Utilities & Expenses -->
-            <div class="form-step" data-step="6">
-                <h2 class="step-title">
-                    <svg class="icon-md lemonade-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    הוצאות ותשלומים שוטפים
-                </h2>
-                <p class="step-subtitle">קביעת חלוקת האחריות לתשלומים השוטפים.</p>
-                <fieldset class="space-y-4">
-                    <div>
-                        <label class="font-medium">ארנונה</label>
-                        <div class="choice-button-group" data-field-name="arnonaPayer">
-                            <button type="button" class="choice-button selected" data-value="שוכר">שוכר</button>
-                            <button type="button" class="choice-button" data-value="משכיר">משכיר</button>
-                        </div>
-                        <input type="hidden" name="arnonaPayer" id="arnonaPayer" value="שוכר">
-                    </div>
-                    <div>
-                        <label class="font-medium">ועד בית</label>
-                        <div class="choice-button-group" data-field-name="vaadPayer">
-                            <button type="button" class="choice-button selected" data-value="שוכר">שוכר</button>
-                            <button type="button" class="choice-button" data-value="משכיר">משכיר</button>
-                            <button type="button" class="choice-button" data-value="לא רלוונטי">לא רלוונטי</button>
-                        </div>
-                        <input type="hidden" name="vaadPayer" id="vaadPayer" value="שוכר">
-                    </div>
-                     <div>
-                        <label class="font-medium">חשבון מים</label>
-                        <div class="choice-button-group" data-field-name="waterPayer">
-                            <button type="button" class="choice-button selected" data-value="שוכר">שוכר</button>
-                            <button type="button" class="choice-button" data-value="משכיר">משכיר</button>
-                        </div>
-                        <input type="hidden" name="waterPayer" id="waterPayer" value="שוכר">
-                    </div>
-                     <div>
-                        <label class="font-medium">חשבון חשמל</label>
-                        <div class="choice-button-group" data-field-name="electricityPayer">
-                            <button type="button" class="choice-button selected" data-value="שוכר">שוכר</button>
-                            <button type="button" class="choice-button" data-value="משכיר">משכיר</button>
-                        </div>
-                        <input type="hidden" name="electricityPayer" id="electricityPayer" value="שוכר">
-                    </div>
-                     <div>
-                        <label class="font-medium">חשבון גז (אם קיים)</label>
-                        <div class="choice-button-group" data-field-name="gasPayer">
-                            <button type="button" class="choice-button selected" data-value="שוכר">שוכר</button>
-                            <button type="button" class="choice-button" data-value="משכיר">משכיר</button>
-                             <button type="button" class="choice-button" data-value="לא רלוונטי">לא רלוונטי</button>
-                        </div>
-                        <input type="hidden" name="gasPayer" id="gasPayer" value="שוכר">
-                    </div>
-                </fieldset>
-            </div>
-            
-            <!-- Step 7: Usage and Conditions -->
-            <div class="form-step" data-step="7">
-                 <h2 class="step-title">
-                    <svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 16V6a1 1 0 00-1-1H3a1 1 0 00-1 1v12a1 1 0 001 1h9a1 1 0 001-1zm5-11l2-2 2 2M20 9l-2-2-2 2M8 9h2m-1 4v4m1-10a1 1 0 11-2 0 1 1 0 012 0z" stroke="currentColor" class="path-stroke"/></svg>
-                    הגדרות שימוש ותנאים נוספים
-                </h2>
-                <p class="step-subtitle">קביעת כללי השימוש בנכס וסעיפים ייחודיים.</p>
-                <div class="space-y-6">
-                    <div>
-                        <label>האם הנכס מיועד למגורים בלבד?</label>
-                         <div class="choice-button-group" data-field-name="usagePurpose">
-                            <button type="button" class="choice-button selected" data-value="מגורים בלבד">כן, למגורים בלבד</button>
-                            <button type="button" class="choice-button" data-value="אחר">לא, יש סיכום אחר</button>
-                        </div>
-                        <input type="hidden" name="usagePurpose" id="usagePurpose" value="מגורים בלבד">
-                        <input type="text" id="usagePurposeOther" name="usagePurposeOther" placeholder="פרט מטרה אחרת..." class="mt-2 w-full hidden">
-                    </div>
-                    <div>
-                        <label>מדיניותך לגבי חיות מחמד</label>
-                        <div class="choice-button-group" data-field-name="petsAllowed">
-                            <button type="button" class="choice-button selected" data-value="אסורות"><svg class="icon-sm mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>אסורות</button>
-                            <button type="button" class="choice-button" data-value="מותרות"><svg class="icon-sm mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>מותרות</button>
-                            <button type="button" class="choice-button" data-value="באישור פרטני">באישור פרטני</button>
-                        </div>
-                        <input type="hidden" name="petsAllowed" id="petsAllowed" value="אסורות">
-                    </div>
-                     <div>
-                        <label>מדיניותך לגבי עישון בנכס</label>
-                        <div class="choice-button-group" data-field-name="smokingAllowed">
-                            <button type="button" class="choice-button selected" data-value="אסור לחלוטין">אסור לחלוטין</button>
-                            <button type="button" class="choice-button" data-value="מותר">מותר</button>
-                            <button type="button" class="choice-button" data-value="במרפסת/בחצר בלבד">במרפסת/בחצר בלבד</button>
-                        </div>
-                        <input type="hidden" name="smokingAllowed" id="smokingAllowed" value="אסור לחלוטין">
-                    </div>
-                     <div>
-                        <label>השכרת משנה (סאבלט) על ידי השוכר</label>
-                        <div class="choice-button-group" data-field-name="subletAllowed">
-                            <button type="button" class="choice-button selected" data-value="אסורה">אסורה</button>
-                            <button type="button" class="choice-button" data-value="באישור מראש ובכתב">באישור מראש ובכתב</button>
-                        </div>
-                        <input type="hidden" name="subletAllowed" id="subletAllowed" value="אסורה">
-                    </div>
-                    <div>
-                        <label for="additionalClauses">סעיפים נוספים או הערות מיוחדות</label>
-                        <div class="choice-button-group mb-2" data-field-name="commonClauses" data-multiselect="true" data-target-textarea="additionalClauses">
-                             <button type="button" class="choice-button btn-sm" data-value="השוכר מתחייב לצבוע את הדירה בתום תקופת השכירות.">צביעת הדירה בסיום</button>
-                             <button type="button" class="choice-button btn-sm" data-value="תיקון נזקי מזגנים (בלאי סביר) יחול על המשכיר.">תיקון מזגנים (משכיר)</button>
-                             <button type="button" class="choice-button btn-sm" data-value="השוכר אינו רשאי לבצע שינויים במבנה הנכס ללא אישור המשכיר בכתב.">איסור שינויים מבניים</button>
-                        </div>
-                        <textarea id="additionalClauses" name="additionalClauses" rows="4" placeholder="הוסף כאן סעיפים נוספים או בחר מההצעות למעלה..."></textarea>
-                    </div>
-                     <div class="mt-4 p-3 bg-pink-50 border border-pink-200 rounded-lg">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" id="agreementConfirmation" name="agreementConfirmation" class="h-5 w-5 lemonade-pink text-pink-600 border-gray-300 rounded focus:ring-pink-500 focus:ring-offset-0">
-                            <span class="mr-3 text-sm text-gray-700">אני מאשר כי הפרטים שהזנתי מדויקים וישמשו ליצירת החוזה.</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 8: Preview and Edit -->
-            <div class="form-step" data-step="8">
-                <h2 class="step-title">
-                    <svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" class="path-stroke"/></svg>
-                    סיכום ועריכה
-                </h2>
-                <p class="step-subtitle">זהו נוסח החוזה שנוצר. באפשרותך לעבור על הטקסט וללחוץ על כפתור ה"ערוך" בכל סעיף כדי לחזור לשאלון ולתקן את הפרטים.</p>
-                
-                <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4 rounded-r-lg" role="alert">
-                    <p class="font-bold">שלב אחרון!</p>
-                    <p>בדוק את כל הפרטים בחוזה. אם יש צורך בשינויים, לחץ על כפתור "ערוך" ליד הסעיף הרלוונטי.</p>
-                </div>
-
-                <div id="contractPreview" class="space-y-6">
-                    <!-- Property Details Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">פרטי הנכס</h3>
-                            <button type="button" class="edit-section-btn" data-section="property" data-step="1">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="propertySection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Landlord Details Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">פרטי המשכיר</h3>
-                            <button type="button" class="edit-section-btn" data-section="landlord" data-step="2">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="landlordSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Tenant Details Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">פרטי השוכר</h3>
-                            <button type="button" class="edit-section-btn" data-section="tenant" data-step="3">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="tenantSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Rental Terms Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">תנאי השכירות</h3>
-                            <button type="button" class="edit-section-btn" data-section="terms" data-step="4">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="termsSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Securities Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">ערבויות ובטחונות</h3>
-                            <button type="button" class="edit-section-btn" data-section="securities" data-step="5">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="securitiesSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Utilities Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">הוצאות ותשלומים שוטפים</h3>
-                            <button type="button" class="edit-section-btn" data-section="utilities" data-step="6">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="utilitiesSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-
-                    <!-- Usage Conditions Section -->
-                    <div class="contract-section">
-                        <div class="section-header">
-                            <h3 class="text-lg font-semibold">הגדרות שימוש ותנאים נוספים</h3>
-                            <button type="button" class="edit-section-btn" data-section="usage" data-step="7">
-                                <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                ערוך
-                            </button>
-                        </div>
-                        <div class="section-content" id="usageSection">
-                            <!-- Content will be dynamically inserted -->
-                        </div>
-                    </div>
-                </div>
-
-                <style>
-                    .contract-section {
-                        @apply bg-white rounded-lg border border-gray-200 p-6;
-                    }
-                    .section-header {
-                        @apply flex justify-between items-center mb-4 pb-3 border-b border-gray-200;
-                    }
-                    .edit-section-btn {
-                        @apply flex items-center gap-1 text-sm text-pink-600 hover:text-pink-700 transition-colors;
-                    }
-                    .section-content {
-                        @apply text-gray-700 space-y-2;
-                    }
-                </style>
-
-                <div class="mt-8 flex justify-between items-center">
-                    <button type="button" id="prevBtn" class="btn btn-secondary">
-                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M15 5l7 7-7 7"></path></svg>
-                        <span>הקודם</span>
-                    </button>
-                    <button type="button" id="downloadPdfBtn" class="btn btn-success">
-                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        הורד כ-PDF
-                    </button>
-                </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div id="navigationContainer" class="mt-10 flex justify-between items-center">
-                 <button type="button" id="prevBtn" class="btn btn-secondary">
-                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M15 5l7 7-7 7"></path></svg>
-                    <span>הקודם</span>
-                </button>
-                <button type="button" id="nextBtn" class="btn btn-primary">
-                    <span>הבא</span>
-                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" class="path-stroke" d="M9 5l-7 7 7 7"></path></svg>
-                </button>
-            </div>
-        </form>
     </div>
 
     <!-- Link to external JS file -->
@@ -438,23 +59,21 @@
         // Modal management
         const modalManager = {
             modal: null,
-            input: null,
-            title: null,
-            saveBtn: null,
-            cancelBtn: null,
+            content: null,
             currentField: null,
+            currentType: null,
 
             init() {
                 // Create modal structure
                 const modalHTML = `
                     <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-                        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                            <div class="mt-3 text-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modalTitle"></h3>
-                                <div class="mt-2 px-7 py-3">
-                                    <input type="text" id="modalInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="relative top-20 mx-auto p-5 border w-[600px] shadow-lg rounded-md bg-white">
+                            <div class="mt-3">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modalTitle"></h3>
+                                <div id="modalContent" class="space-y-4">
+                                    <!-- Dynamic content will be inserted here -->
                                 </div>
-                                <div class="flex justify-end space-x-4 mt-4">
+                                <div class="flex justify-end space-x-4 mt-6">
                                     <button id="modalCancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
                                         ביטול
                                     </button>
@@ -470,7 +89,7 @@
 
                 // Cache modal elements
                 this.modal = document.getElementById('editModal');
-                this.input = document.getElementById('modalInput');
+                this.content = document.getElementById('modalContent');
                 this.title = document.getElementById('modalTitle');
                 this.saveBtn = document.getElementById('modalSave');
                 this.cancelBtn = document.getElementById('modalCancel');
@@ -479,7 +98,6 @@
                 this.saveBtn.addEventListener('click', this.handleSave.bind(this));
                 this.cancelBtn.addEventListener('click', this.handleCancel.bind(this));
                 this.modal.addEventListener('click', this.handleOutsideClick.bind(this));
-                this.input.addEventListener('keydown', this.handleKeydown.bind(this));
 
                 // Prevent clicks inside modal from closing it
                 this.modal.querySelector('.relative').addEventListener('click', (e) => {
@@ -487,29 +105,187 @@
                 });
             },
 
-            open(fieldId, title) {
+            open(fieldId, title, type = 'text') {
                 this.currentField = fieldId;
+                this.currentType = type;
                 this.title.textContent = title;
-                this.input.value = document.getElementById(fieldId).value;
+                
+                // Clear previous content
+                this.content.innerHTML = '';
+                
+                // Get current value
+                const field = document.getElementById(fieldId);
+                const currentValue = field.value;
+
+                // Create appropriate input based on type
+                switch(type) {
+                    case 'text':
+                        this.createTextInput(currentValue);
+                        break;
+                    case 'choice':
+                        this.createChoiceButtons(fieldId);
+                        break;
+                    case 'slider':
+                        this.createSlider(fieldId);
+                        break;
+                    case 'multiselect':
+                        this.createMultiselect(fieldId);
+                        break;
+                    case 'date':
+                        this.createDateInput(currentValue);
+                        break;
+                    case 'number':
+                        this.createNumberInput(currentValue);
+                        break;
+                    default:
+                        this.createTextInput(currentValue);
+                }
+
                 this.modal.classList.remove('hidden');
-                this.input.focus();
+                // Focus first input
+                const firstInput = this.content.querySelector('input, select, textarea');
+                if (firstInput) firstInput.focus();
+            },
+
+            createTextInput(value) {
+                this.content.innerHTML = `
+                    <input type="text" id="modalInput" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           value="${value}">
+                `;
+            },
+
+            createChoiceButtons(fieldId) {
+                const field = document.getElementById(fieldId);
+                const group = document.querySelector(`[data-field-name="${fieldId}"]`);
+                if (!group) return;
+
+                const buttons = Array.from(group.querySelectorAll('.choice-button'))
+                    .map(btn => `
+                        <button type="button" class="choice-button ${btn.classList.contains('selected') ? 'selected' : ''}"
+                                data-value="${btn.dataset.value}">
+                            ${btn.innerHTML}
+                        </button>
+                    `).join('');
+
+                this.content.innerHTML = `
+                    <div class="choice-button-group" data-field-name="${fieldId}">
+                        ${buttons}
+                    </div>
+                `;
+
+                // Add click handlers
+                this.content.querySelectorAll('.choice-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.content.querySelectorAll('.choice-button').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                    });
+                });
+            },
+
+            createSlider(fieldId) {
+                const field = document.getElementById(fieldId);
+                const min = field.min || 0;
+                const max = field.max || 100;
+                const value = field.value;
+                const step = field.step || 1;
+
+                this.content.innerHTML = `
+                    <div class="slider-label-group">
+                        <label for="modalInput">${field.previousElementSibling?.textContent || ''}</label>
+                        <span id="modalValue" class="slider-value">${value}</span>
+                    </div>
+                    <input type="range" id="modalInput" 
+                           class="w-full slider-container"
+                           min="${min}" max="${max}" value="${value}" step="${step}">
+                `;
+
+                // Add value update handler
+                const input = this.content.querySelector('#modalInput');
+                const valueDisplay = this.content.querySelector('#modalValue');
+                input.addEventListener('input', () => {
+                    valueDisplay.textContent = input.value;
+                });
+            },
+
+            createMultiselect(fieldId) {
+                const field = document.getElementById(fieldId);
+                const group = document.querySelector(`[data-field-name="${fieldId}"]`);
+                if (!group) return;
+
+                const buttons = Array.from(group.querySelectorAll('.choice-button'))
+                    .map(btn => `
+                        <button type="button" class="choice-button ${btn.classList.contains('selected') ? 'selected' : ''}"
+                                data-value="${btn.dataset.value}">
+                            ${btn.innerHTML}
+                        </button>
+                    `).join('');
+
+                this.content.innerHTML = `
+                    <div class="choice-button-group" data-field-name="${fieldId}" data-multiselect="true">
+                        ${buttons}
+                    </div>
+                `;
+
+                // Add click handlers
+                this.content.querySelectorAll('.choice-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        btn.classList.toggle('selected');
+                    });
+                });
+            },
+
+            createDateInput(value) {
+                this.content.innerHTML = `
+                    <input type="date" id="modalInput" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           value="${value}">
+                `;
+            },
+
+            createNumberInput(value) {
+                this.content.innerHTML = `
+                    <input type="number" id="modalInput" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           value="${value}">
+                `;
             },
 
             close() {
                 this.modal.classList.add('hidden');
                 this.currentField = null;
-                this.input.value = '';
+                this.currentType = null;
+                this.content.innerHTML = '';
             },
 
             handleSave(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (this.currentField) {
-                    const newValue = this.input.value;
-                    document.getElementById(this.currentField).value = newValue;
-                    generateContractContent();
+
+                if (!this.currentField) return;
+
+                const field = document.getElementById(this.currentField);
+                if (!field) return;
+
+                let newValue;
+                switch(this.currentType) {
+                    case 'choice':
+                        const selectedBtn = this.content.querySelector('.choice-button.selected');
+                        newValue = selectedBtn ? selectedBtn.dataset.value : field.value;
+                        break;
+                    case 'multiselect':
+                        const selectedValues = Array.from(this.content.querySelectorAll('.choice-button.selected'))
+                            .map(btn => btn.dataset.value);
+                        newValue = selectedValues.join(', ');
+                        break;
+                    default:
+                        const input = this.content.querySelector('#modalInput');
+                        newValue = input ? input.value : field.value;
                 }
+
+                field.value = newValue;
                 this.close();
+                generateContractContent();
             },
 
             handleCancel(e) {
@@ -522,267 +298,661 @@
                 if (e.target === this.modal) {
                     this.close();
                 }
-            },
-
-            handleKeydown(e) {
-                if (e.key === 'Enter') {
-                    this.handleSave(e);
-                } else if (e.key === 'Escape') {
-                    this.handleCancel(e);
-                }
             }
         };
 
         // Initialize modal manager when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             modalManager.init();
-            // ... rest of your existing DOMContentLoaded code ...
         });
 
         // Update the openEditModal function to use the modal manager
-        function openEditModal(fieldId, title) {
-            modalManager.open(fieldId, title);
-        }
+        function openEditModal(fieldId, label, inputType = 'text') {
+            const modal = document.getElementById('editModal');
+            if (!modal) return;
 
-        // Make generateContractContent globally accessible
-        function generateContractContent() {
-            // Property Details
-            const propertySection = document.getElementById('propertySection');
-            const propertyAddress = document.getElementById('propertyAddress').value;
-            const propertyType = document.getElementById('propertyType').value;
-            const propertyRooms = document.getElementById('propertyRooms').value;
-            const propertySize = document.getElementById('propertySize').value;
-            const furnitureItems = document.getElementById('furnitureItems').value;
-            const knownDefects = document.getElementById('knownDefects').value;
-            const defectsDetails = document.getElementById('defectsDetails').value;
+            const currentValue = document.getElementById(fieldId).value;
+            let inputHtml = '';
 
-            propertySection.innerHTML = `
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">כתובת</p>
-                                <p>${propertyAddress}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyAddress', 'כתובת הנכס'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
+            switch (inputType) {
+                case 'choice':
+                    inputHtml = `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <select id="modalInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="cash" ${currentValue === 'cash' ? 'selected' : ''}>מזומן</option>
+                                <option value="bank_transfer" ${currentValue === 'bank_transfer' ? 'selected' : ''}>העברה בנקאית</option>
+                                <option value="check" ${currentValue === 'check' ? 'selected' : ''}>צ'ק</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">סוג הנכס</p>
-                                <p>${propertyType}</p>
+                    `;
+                    break;
+                case 'multiselect':
+                    const options = inputType === 'utilitiesIncluded' ? [
+                        'חשמל',
+                        'מים',
+                        'גז',
+                        'אינטרנט',
+                        'טלפון',
+                        'ועד בית'
+                    ] : [
+                        'עישון',
+                        'חיות מחמד',
+                        'שינויים בנכס',
+                        'תיקונים',
+                        'ניקיון',
+                        'אחריות'
+                    ];
+                    inputHtml = `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <div class="space-y-2">
+                                ${options.map(option => `
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                                            value="${option}" ${currentValue.includes(option) ? 'checked' : ''}>
+                                        <span class="mr-2">${option}</span>
+                                    </label>
+                                `).join('')}
                             </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyType', 'סוג הנכס'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
                         </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">מספר חדרים</p>
-                                <p>${propertyRooms}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyRooms', 'מספר חדרים'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
+                    `;
+                    break;
+                case 'date':
+                    inputHtml = `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <input type="date" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">גודל במ"ר</p>
-                                <p>${propertySize}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertySize', 'גודל במ"ר'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
+                    `;
+                    break;
+                case 'number':
+                    inputHtml = `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <input type="number" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
-                    </div>
-                    ${furnitureItems ? `
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">ריהוט ואביזרים</p>
-                                <p>${furnitureItems}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('furnitureItems', 'ריהוט ואביזרים'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
+                    `;
+                    break;
+                default:
+                    inputHtml = `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <input type="text" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
+                    `;
+            }
+
+            // Set modal content
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 w-full max-w-md" onclick="event.stopPropagation()">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">עריכת ${label}</h3>
+                    ${inputHtml}
+                    <div class="mt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                            ביטול
+                        </button>
+                        <button type="button" onclick="saveEdit('${fieldId}', '${inputType}')" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                            שמירה
+                        </button>
                     </div>
-                    ` : ''}
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">ליקויים ידועים</p>
-                                <p>${knownDefects}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('knownDefects', 'ליקויים ידועים'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    ${defectsDetails ? `
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold">פרטי ליקויים</p>
-                                <p>${defectsDetails}</p>
-                            </div>
-                            <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('defectsDetails', 'פרטי ליקויים'); return false;" class="text-blue-600 hover:text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    ` : ''}
                 </div>
             `;
 
-            // Continue with similar structure for other sections...
+            // Show modal
+            modal.style.display = 'flex';
+
+            // Focus input
+            setTimeout(() => {
+                const input = document.getElementById('modalInput');
+                if (input) input.focus();
+            }, 100);
+
+            // Add event listeners
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeEditModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeEditModal();
+                if (e.key === 'Enter' && document.activeElement.id === 'modalInput') {
+                    saveEdit(fieldId, inputType);
+                }
+            });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize form steps
-            const formSteps = document.querySelectorAll('.form-step');
-            const progressBar = document.getElementById('progressBar');
-            const nextBtn = document.getElementById('nextBtn');
-            const prevBtn = document.getElementById('prevBtn');
-            let currentStep = 1;
-            const totalSteps = formSteps.length;
-
-            // Update progress bar
-            function updateProgress() {
-                const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
-                progressBar.style.width = `${progress}%`;
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            if (modal) {
+                modal.style.display = 'none';
             }
+        }
 
-            // Show current step
-            function showStep(step) {
-                formSteps.forEach((formStep, index) => {
-                    formStep.classList.toggle('active', index + 1 === step);
-                });
-                currentStep = step;
-                updateProgress();
-
-                // Update navigation buttons
-                prevBtn.style.display = step === 1 ? 'none' : 'flex';
-                nextBtn.style.display = step === totalSteps ? 'none' : 'flex';
-
-                // Generate contract content when reaching the preview step
-                if (step === totalSteps) {
-                    generateContractContent();
+        function saveEdit(fieldId, inputType) {
+            let value;
+            if (inputType === 'multiselect') {
+                const checkboxes = document.querySelectorAll('#editModal input[type="checkbox"]');
+                value = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value)
+                    .join(', ');
+            } else {
+                const input = document.getElementById('modalInput');
+                if (input) {
+                    value = input.value;
                 }
             }
 
-            // Handle edit section buttons
-            document.querySelectorAll('.edit-section-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetStep = parseInt(this.dataset.step);
-                    showStep(targetStep);
-                });
-            });
+            if (value !== undefined) {
+                document.getElementById(fieldId).value = value;
+                generateContractContent();
+                closeEditModal();
+            }
+        }
 
-            // Handle next button
-            nextBtn.addEventListener('click', () => {
-                if (currentStep < totalSteps) {
-                    showStep(currentStep + 1);
-                }
-            });
+        // ... existing code ...
 
-            // Handle previous button
-            prevBtn.addEventListener('click', () => {
-                if (currentStep > 1) {
-                    showStep(currentStep - 1);
-                }
-            });
+        function generateContractContent() {
+            // Get property details
+            const propertyAddress = document.getElementById('propertyAddress').value;
+            const propertyType = document.getElementById('propertyType').value;
+            const propertySize = document.getElementById('propertySize').value;
+            const propertyRooms = document.getElementById('propertyRooms').value;
+            const propertyFloor = document.getElementById('propertyFloor').value;
 
-            // Initialize the form
-            showStep(1);
+            // Get landlord details
+            const landlordName = document.getElementById('landlordName').value;
+            const landlordId = document.getElementById('landlordId').value;
+            const landlordPhone = document.getElementById('landlordPhone').value;
+            const landlordEmail = document.getElementById('landlordEmail').value;
+            const landlordAddress = document.getElementById('landlordAddress').value;
 
-            // Handle PDF download
-            document.getElementById('downloadPdfBtn').addEventListener('click', async function() {
-                // Show loading state
-                const downloadBtn = this;
-                const originalText = downloadBtn.innerHTML;
-                downloadBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> מוריד PDF...';
-                downloadBtn.disabled = true;
+            // Get tenant details
+            const tenantName = document.getElementById('tenantName').value;
+            const tenantId = document.getElementById('tenantId').value;
+            const tenantPhone = document.getElementById('tenantPhone').value;
+            const tenantEmail = document.getElementById('tenantEmail').value;
+            const tenantAddress = document.getElementById('tenantAddress').value;
 
-                try {
-                    // Create a temporary container for the PDF content
-                    const pdfContainer = document.createElement('div');
-                    pdfContainer.className = 'p-8 max-w-4xl mx-auto';
-                    pdfContainer.dir = 'rtl';
+            // Get rental terms
+            const rentAmount = document.getElementById('rentAmount').value;
+            const rentPaymentDay = document.getElementById('rentPaymentDay').value;
+            const rentStartDate = document.getElementById('rentStartDate').value;
+            const rentEndDate = document.getElementById('rentEndDate').value;
+            const rentPaymentMethod = document.getElementById('rentPaymentMethod').value;
 
-                    // Add header
-                    pdfContainer.innerHTML = `
-                        <div class="text-center mb-8">
-                            <h1 class="text-2xl font-bold mb-2">חוזה שכירות</h1>
-                            <p class="text-gray-600">נוצר בתאריך: ${new Date().toLocaleDateString('he-IL')}</p>
+            // Get securities details
+            const securityAmount = document.getElementById('securityAmount').value;
+            const securityPaymentMethod = document.getElementById('securityPaymentMethod').value;
+            const securityReturnConditions = document.getElementById('securityReturnConditions').value;
+
+            // Get utilities details
+            const utilitiesIncluded = document.getElementById('utilitiesIncluded').value;
+            const utilitiesPaymentMethod = document.getElementById('utilitiesPaymentMethod').value;
+            const utilitiesAdditionalNotes = document.getElementById('utilitiesAdditionalNotes').value;
+
+            // Get usage conditions details
+            const usageRestrictions = document.getElementById('usageRestrictions').value;
+            const maintenanceResponsibilities = document.getElementById('maintenanceResponsibilities').value;
+            const additionalConditions = document.getElementById('additionalConditions').value;
+
+            // Update contract preview content
+            const contractPreviewContent = document.getElementById('contractPreviewContent');
+            if (contractPreviewContent) {
+                contractPreviewContent.innerHTML = `
+                    <div class="space-y-6">
+                        <!-- Property Details Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('propertyDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">פרטי הנכס</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${propertyAddress}</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="propertyDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="propertyDetails" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">כתובת הנכס</p>
+                                            <p>${propertyAddress}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyAddress', 'כתובת הנכס', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">סוג הנכס</p>
+                                            <p>${propertyType}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyType', 'סוג הנכס', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">גודל הנכס</p>
+                                            <p>${propertySize}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertySize', 'גודל הנכס', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">מספר חדרים</p>
+                                            <p>${propertyRooms}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyRooms', 'מספר חדרים', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">קומה</p>
+                                            <p>${propertyFloor}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyFloor', 'קומה', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    `;
 
-                    // Clone the contract sections
-                    const contractPreview = document.getElementById('contractPreview').cloneNode(true);
-                    
-                    // Remove edit buttons from the clone
-                    contractPreview.querySelectorAll('.edit-section-btn').forEach(btn => btn.remove());
-                    
-                    // Add the contract content to the PDF container
-                    pdfContainer.appendChild(contractPreview);
+                        <!-- Landlord Details Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('landlordDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">פרטי בעל הנכס</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${landlordName}</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="landlordDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="landlordDetails" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">שם בעל הנכס</p>
+                                            <p>${landlordName}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordName', 'שם בעל הנכס', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תעודת זהות</p>
+                                            <p>${landlordId}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordId', 'תעודת זהות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">טלפון</p>
+                                            <p>${landlordPhone}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordPhone', 'טלפון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">דוא"ל</p>
+                                            <p>${landlordEmail}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordEmail', 'דוא"ל', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">כתובת</p>
+                                            <p>${landlordAddress}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordAddress', 'כתובת', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    // Configure PDF options
-                    const opt = {
-                        margin: 1,
-                        filename: 'חוזה_שכירות.pdf',
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2 },
-                        jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' }
-                    };
+                        <!-- Tenant Details Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('tenantDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">פרטי השוכר</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${tenantName}</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="tenantDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="tenantDetails" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">שם השוכר</p>
+                                            <p>${tenantName}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantName', 'שם השוכר', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תעודת זהות</p>
+                                            <p>${tenantId}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantId', 'תעודת זהות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">טלפון</p>
+                                            <p>${tenantPhone}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantPhone', 'טלפון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">דוא"ל</p>
+                                            <p>${tenantEmail}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantEmail', 'דוא"ל', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">כתובת</p>
+                                            <p>${tenantAddress}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantAddress', 'כתובת', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    // Generate and download the PDF
-                    await html2pdf().set(opt).from(pdfContainer).save();
+                        <!-- Rental Terms Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('rentalTerms')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">תנאי השכירות</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${rentAmount} ₪</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="rentalTermsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="rentalTerms" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">סכום שכירות</p>
+                                            <p>${rentAmount}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentAmount', 'סכום שכירות', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">יום תשלום שכירות</p>
+                                            <p>${rentPaymentDay}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentPaymentDay', 'יום תשלום שכירות', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תאריך התחלה</p>
+                                            <p>${rentStartDate}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentStartDate', 'תאריך התחלה', 'date'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תאריך סיום</p>
+                                            <p>${rentEndDate}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentEndDate', 'תאריך סיום', 'date'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">אופן תשלום שכירות</p>
+                                            <p>${rentPaymentMethod}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentPaymentMethod', 'אופן תשלום שכירות', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    // Show success message
-                    const successAlert = document.createElement('div');
-                    successAlert.className = 'fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded';
-                    successAlert.innerHTML = 'החוזה הורד בהצלחה!';
-                    document.body.appendChild(successAlert);
-                    setTimeout(() => successAlert.remove(), 3000);
+                        <!-- Securities Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('securities')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">פיקדון</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${securityAmount} ₪</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="securitiesIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="securities" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">סכום פיקדון</p>
+                                            <p>${securityAmount}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityAmount', 'סכום פיקדון', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">אופן תשלום פיקדון</p>
+                                            <p>${securityPaymentMethod}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityPaymentMethod', 'אופן תשלום פיקדון', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תנאי החזרת פיקדון</p>
+                                            <p>${securityReturnConditions}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityReturnConditions', 'תנאי החזרת פיקדון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                } catch (error) {
-                    console.error('Error generating PDF:', error);
-                    
-                    // Show error message
-                    const errorAlert = document.createElement('div');
-                    errorAlert.className = 'fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded';
-                    errorAlert.innerHTML = 'אירעה שגיאה ביצירת ה-PDF. אנא נסה שוב.';
-                    document.body.appendChild(errorAlert);
-                    setTimeout(() => errorAlert.remove(), 3000);
-                } finally {
-                    // Restore button state
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.disabled = false;
-                }
-            });
-        });
+                        <!-- Utilities Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('utilities')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">שירותים</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${utilitiesIncluded}</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="utilitiesIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="utilities" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">שירותים כלולים</p>
+                                            <p>${utilitiesIncluded}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesIncluded', 'שירותים כלולים', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">אופן תשלום שירותים</p>
+                                            <p>${utilitiesPaymentMethod}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesPaymentMethod', 'אופן תשלום שירותים', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">הערות נוספות</p>
+                                            <p>${utilitiesAdditionalNotes}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesAdditionalNotes', 'הערות נוספות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Usage Conditions Section -->
+                        <div class="bg-white rounded-lg shadow">
+                            <button onclick="toggleSection('usageConditions')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
+                                <h3 class="text-lg font-medium text-gray-900">תנאי שימוש</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">${usageRestrictions}</span>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="usageConditionsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </button>
+                            <div id="usageConditions" class="hidden px-6 pb-4">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">הגבלות שימוש</p>
+                                            <p>${usageRestrictions}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('usageRestrictions', 'הגבלות שימוש', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">אחריות לתחזוקה</p>
+                                            <p>${maintenanceResponsibilities}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('maintenanceResponsibilities', 'אחריות לתחזוקה', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold">תנאים נוספים</p>
+                                            <p>${additionalConditions}</p>
+                                        </div>
+                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('additionalConditions', 'תנאים נוספים', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(sectionId + 'Icon');
+            if (section && icon) {
+                section.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            }
+        }
+
+        // ... existing code ...
     </script>
 </body>
 </html>
