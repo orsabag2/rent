@@ -399,6 +399,17 @@ function generateFormSteps(questions) {
         titleElement.textContent = questionText;
         stepDiv.appendChild(titleElement);
 
+        // Only add edit button for the last step (group edit)
+        if (stepCount === questions.length) {
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'btn btn-sm btn-secondary edit-section-btn';
+            editBtn.style.marginRight = '1rem';
+            editBtn.innerText = 'ערוך';
+            editBtn.onclick = function() { window.startEditing(stepCount); };
+            stepDiv.appendChild(editBtn);
+        }
+
         if (uxTip) {
             const subtitleElement = document.createElement('p');
             subtitleElement.classList.add('step-subtitle');
@@ -450,7 +461,7 @@ function generateFormSteps(questions) {
         });
     });
 
-    // Add the final preview step
+    // Add the final preview/summary step
     const previewStepDiv = document.createElement('div');
     previewStepDiv.classList.add('form-step');
     previewStepDiv.setAttribute('data-step', stepCount);
@@ -459,37 +470,20 @@ function generateFormSteps(questions) {
             <svg class="icon-md lemonade-pink" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" class="path-stroke"/></svg>
             סיכום ועריכה
         </h2>
-        <p class="step-subtitle">זהו נוסח החוזה שנוצר. באפשרותך לעבור על הטקסט וללחוץ על כפתור ה"ערוך" בכל סעיף כדי לחזור לשאלון ולתקן את הפרטים.</p>
-        
+        <p class="step-subtitle">זהו נוסח החוזה שנוצר. באפשרותך לעבור על הטקסט וללחוץ על כפתור ה"ערוך" בקבוצה כדי לחזור לשאלון ולתקן את הפרטים.</p>
         <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4 rounded-r-lg" role="alert">
             <p class="font-bold">שלב אחרון!</p>
-            <p>בדוק את כל הפרטים בחוזה. אם יש צורך בשינויים, לחץ על כפתור "ערוך" ליד הסעיף הרלוונטי.</p>
+            <p>בדוק את כל הפרטים בחוזה. אם יש צורך בשינויים, לחץ על כפתור "ערוך" בקבוצה.</p>
         </div>
-
         <div id="contractPreview" class="space-y-6">
             <!-- Contract sections will be dynamically inserted here -->
         </div>
-
-        <style>
-            .contract-section {
-                @apply bg-white rounded-lg border border-gray-200 p-6;
-            }
-            .section-header {
-                @apply flex justify-between items-center mb-4 pb-3 border-b border-gray-200;
-            }
-            .edit-section-btn {
-                @apply flex items-center gap-1 text-sm text-pink-600 hover:text-pink-700 transition-colors;
-            }
-            .section-content {
-                @apply text-gray-700 space-y-2;
-            }
-        </style>
-
         <div class="mt-8 flex justify-between items-center">
             <button type="button" id="downloadPdfBtn" class="btn btn-success">
                 <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 הורד כ-PDF
             </button>
+            <button type="button" id="submitBtn" class="btn btn-primary">סיים ושלח</button>
         </div>
     `;
     formStepsContainer.appendChild(previewStepDiv);
@@ -684,8 +678,8 @@ function formatDisplayValue(value, placeholder = 'לא צוין') {
  * @returns {string} The contract HTML string.
  */
 function getContractHTML(formData, forPdf = false) {
-    const createBox = (title, content, stepTarget) => {
-        const editButton = !forPdf ? `<button type="button" class="btn btn-sm btn-secondary edit-section-btn" onclick="startEditing(${stepTarget})">ערוך</button>` : '';
+    const createBox = (title, content, stepTarget, isLast) => {
+        const editButton = (!forPdf && isLast) ? `<button type="button" class="btn btn-sm btn-secondary edit-section-btn" onclick="startEditing(${stepTarget})">ערוך</button>` : '';
         const boxStyle = forPdf ? 'style="border: none; box-shadow: none; background: none;"' : '';
         return `
             <div class="contract-section-box" ${boxStyle}>
@@ -753,7 +747,8 @@ function getContractHTML(formData, forPdf = false) {
             html += createBox(
                 questionText,
                 `<p>${displayValue}</p>`,
-                index + 1 // Step number for editing
+                index + 1, // Step number for editing
+                index === questions.length - 1 // Only last section gets edit button
             );
         }
     });

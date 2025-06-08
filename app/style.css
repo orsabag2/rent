@@ -8,7 +8,7 @@ html, body {
 }
 
 body {
-    font-family: 'Heebo', sans-serif; 
+    font-family: 'IBM Plex Sans Hebrew', Heebo, Arial, sans-serif !important; 
     background-color: #f9fafb; 
     color: #1f2937; 
     overflow-x: hidden; /* Only hide horizontal overflow */
@@ -119,7 +119,7 @@ header {
     justify-content: flex-end; 
     min-height: 20px; /* Adjusted min-height for even tighter spacing */
     flex-direction: row-reverse;
-    margin-bottom: 0.15rem; /* Adjusted consistent spacing between steps */
+    margin-bottom: 1rem; /* 16px spacing between steps */
 }
 
 /* Ensure the first item doesn't have an extra top margin if space-y is used */
@@ -287,7 +287,7 @@ input[type="range"]::-moz-range-thumb {
 /* Editable Contract Box Styles */
 .contract-section-box {
     position: relative;
-    font-family: 'Heebo', Arial, sans-serif;
+    font-family: 'IBM Plex Sans Hebrew', Heebo, Arial, sans-serif !important;
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
@@ -348,4 +348,8 @@ input[type="range"]::-moz-range-thumb {
 .summary-section span {
     font-weight: 500;
     color: #374151;
+}
+
+body, html, .content-wrapper, .main-layout, .sidebar-progress-container, .step-title, .step-subtitle, .contract-section-box, .summary-section, .summary-section span, .summary-section svg, input, textarea, select, button {
+    font-family: 'IBM Plex Sans Hebrew', Heebo, Arial, sans-serif !important;
 }

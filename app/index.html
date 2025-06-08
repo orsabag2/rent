@@ -1,4 +1,4 @@
-ns<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -9,13 +9,14 @@ ns<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 
     <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" xintegrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="text-gray-800 p-4">
     <header class="mb-6 text-center">
@@ -51,6 +52,8 @@ ns<!DOCTYPE html>
             </div>
         </div>
     </div>
+
+    <div id="editModeContainer" class="hidden"></div>
 
     <!-- Link to external JS file -->
     <script src="script.js" defer></script>
@@ -360,7 +363,9 @@ ns<!DOCTYPE html>
                 case 'date':
                     inputHtml = `
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <label class="block text-sm font-medium text-gray-700">
+                                ${label}
+                            </label>
                             <input type="date" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                     `;
@@ -368,7 +373,9 @@ ns<!DOCTYPE html>
                 case 'number':
                     inputHtml = `
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <label class="block text-sm font-medium text-gray-700">
+                                ${label}
+                            </label>
                             <input type="number" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                     `;
@@ -376,7 +383,9 @@ ns<!DOCTYPE html>
                 default:
                     inputHtml = `
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">${label}</label>
+                            <label class="block text-sm font-medium text-gray-700">
+                                ${label}
+                            </label>
                             <input type="text" id="modalInput" value="${currentValue}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                     `;
@@ -449,499 +458,6 @@ ns<!DOCTYPE html>
             }
         }
 
-        // ... existing code ...
-
-        function generateContractContent() {
-            // Get property details
-            const propertyAddress = document.getElementById('propertyAddress').value;
-            const propertyType = document.getElementById('propertyType').value;
-            const propertySize = document.getElementById('propertySize').value;
-            const propertyRooms = document.getElementById('propertyRooms').value;
-            const propertyFloor = document.getElementById('propertyFloor').value;
-
-            // Get landlord details
-            const landlordName = document.getElementById('landlordName').value;
-            const landlordId = document.getElementById('landlordId').value;
-            const landlordPhone = document.getElementById('landlordPhone').value;
-            const landlordEmail = document.getElementById('landlordEmail').value;
-            const landlordAddress = document.getElementById('landlordAddress').value;
-
-            // Get tenant details
-            const tenantName = document.getElementById('tenantName').value;
-            const tenantId = document.getElementById('tenantId').value;
-            const tenantPhone = document.getElementById('tenantPhone').value;
-            const tenantEmail = document.getElementById('tenantEmail').value;
-            const tenantAddress = document.getElementById('tenantAddress').value;
-
-            // Get rental terms
-            const rentAmount = document.getElementById('rentAmount').value;
-            const rentPaymentDay = document.getElementById('rentPaymentDay').value;
-            const rentStartDate = document.getElementById('rentStartDate').value;
-            const rentEndDate = document.getElementById('rentEndDate').value;
-            const rentPaymentMethod = document.getElementById('rentPaymentMethod').value;
-
-            // Get securities details
-            const securityAmount = document.getElementById('securityAmount').value;
-            const securityPaymentMethod = document.getElementById('securityPaymentMethod').value;
-            const securityReturnConditions = document.getElementById('securityReturnConditions').value;
-
-            // Get utilities details
-            const utilitiesIncluded = document.getElementById('utilitiesIncluded').value;
-            const utilitiesPaymentMethod = document.getElementById('utilitiesPaymentMethod').value;
-            const utilitiesAdditionalNotes = document.getElementById('utilitiesAdditionalNotes').value;
-
-            // Get usage conditions details
-            const usageRestrictions = document.getElementById('usageRestrictions').value;
-            const maintenanceResponsibilities = document.getElementById('maintenanceResponsibilities').value;
-            const additionalConditions = document.getElementById('additionalConditions').value;
-
-            // Update contract preview content
-            const contractPreviewContent = document.getElementById('contractPreviewContent');
-            if (contractPreviewContent) {
-                contractPreviewContent.innerHTML = `
-                    <div class="space-y-6">
-                        <!-- Property Details Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('propertyDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">פרטי הנכס</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${propertyAddress}</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="propertyDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="propertyDetails" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">כתובת הנכס</p>
-                                            <p>${propertyAddress}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyAddress', 'כתובת הנכס', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">סוג הנכס</p>
-                                            <p>${propertyType}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyType', 'סוג הנכס', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">גודל הנכס</p>
-                                            <p>${propertySize}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertySize', 'גודל הנכס', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">מספר חדרים</p>
-                                            <p>${propertyRooms}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyRooms', 'מספר חדרים', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">קומה</p>
-                                            <p>${propertyFloor}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('propertyFloor', 'קומה', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Landlord Details Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('landlordDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">פרטי בעל הנכס</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${landlordName}</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="landlordDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="landlordDetails" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">שם בעל הנכס</p>
-                                            <p>${landlordName}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordName', 'שם בעל הנכס', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תעודת זהות</p>
-                                            <p>${landlordId}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordId', 'תעודת זהות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">טלפון</p>
-                                            <p>${landlordPhone}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordPhone', 'טלפון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">דוא"ל</p>
-                                            <p>${landlordEmail}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordEmail', 'דוא"ל', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">כתובת</p>
-                                            <p>${landlordAddress}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('landlordAddress', 'כתובת', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tenant Details Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('tenantDetails')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">פרטי השוכר</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${tenantName}</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="tenantDetailsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="tenantDetails" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">שם השוכר</p>
-                                            <p>${tenantName}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantName', 'שם השוכר', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תעודת זהות</p>
-                                            <p>${tenantId}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantId', 'תעודת זהות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">טלפון</p>
-                                            <p>${tenantPhone}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantPhone', 'טלפון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">דוא"ל</p>
-                                            <p>${tenantEmail}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantEmail', 'דוא"ל', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">כתובת</p>
-                                            <p>${tenantAddress}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('tenantAddress', 'כתובת', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rental Terms Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('rentalTerms')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">תנאי השכירות</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${rentAmount} ₪</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="rentalTermsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="rentalTerms" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">סכום שכירות</p>
-                                            <p>${rentAmount}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentAmount', 'סכום שכירות', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">יום תשלום שכירות</p>
-                                            <p>${rentPaymentDay}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentPaymentDay', 'יום תשלום שכירות', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תאריך התחלה</p>
-                                            <p>${rentStartDate}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentStartDate', 'תאריך התחלה', 'date'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תאריך סיום</p>
-                                            <p>${rentEndDate}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentEndDate', 'תאריך סיום', 'date'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">אופן תשלום שכירות</p>
-                                            <p>${rentPaymentMethod}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('rentPaymentMethod', 'אופן תשלום שכירות', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Securities Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('securities')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">פיקדון</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${securityAmount} ₪</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="securitiesIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="securities" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">סכום פיקדון</p>
-                                            <p>${securityAmount}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityAmount', 'סכום פיקדון', 'number'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">אופן תשלום פיקדון</p>
-                                            <p>${securityPaymentMethod}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityPaymentMethod', 'אופן תשלום פיקדון', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תנאי החזרת פיקדון</p>
-                                            <p>${securityReturnConditions}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('securityReturnConditions', 'תנאי החזרת פיקדון', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Utilities Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('utilities')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">שירותים</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${utilitiesIncluded}</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="utilitiesIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="utilities" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">שירותים כלולים</p>
-                                            <p>${utilitiesIncluded}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesIncluded', 'שירותים כלולים', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">אופן תשלום שירותים</p>
-                                            <p>${utilitiesPaymentMethod}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesPaymentMethod', 'אופן תשלום שירותים', 'choice'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">הערות נוספות</p>
-                                            <p>${utilitiesAdditionalNotes}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('utilitiesAdditionalNotes', 'הערות נוספות', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Usage Conditions Section -->
-                        <div class="bg-white rounded-lg shadow">
-                            <button onclick="toggleSection('usageConditions')" class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50">
-                                <h3 class="text-lg font-medium text-gray-900">תנאי שימוש</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-500">${usageRestrictions}</span>
-                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="usageConditionsIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <div id="usageConditions" class="hidden px-6 pb-4">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">הגבלות שימוש</p>
-                                            <p>${usageRestrictions}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('usageRestrictions', 'הגבלות שימוש', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">אחריות לתחזוקה</p>
-                                            <p>${maintenanceResponsibilities}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('maintenanceResponsibilities', 'אחריות לתחזוקה', 'multiselect'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold">תנאים נוספים</p>
-                                            <p>${additionalConditions}</p>
-                                        </div>
-                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openEditModal('additionalConditions', 'תנאים נוספים', 'text'); return false;" class="text-blue-600 hover:text-blue-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const icon = document.getElementById(sectionId + 'Icon');
@@ -950,8 +466,6 @@ ns<!DOCTYPE html>
                 icon.classList.toggle('rotate-180');
             }
         }
-
-        // ... existing code ...
     </script>
 </body>
 </html>
