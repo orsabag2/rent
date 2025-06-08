@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import path from 'path';
-import { promises as fs } from 'fs';
+import { rgb } from 'pdf-lib';
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         y,
         size: fontSize,
         font,
-        color: [0, 0, 0],
+        color: rgb(0, 0, 0),
       });
       y -= fontSize + 6;
     }
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    return new NextResponse(JSON.stringify({ error: err.message }), { status: 500 });
+    const error = err as Error;
+    return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

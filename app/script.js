@@ -86,6 +86,11 @@ try {
     const form = document.getElementById('rentalContractForm');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
+    // Explicitly disable the next button on initial load
+    if (nextBtn) {
+        nextBtn.disabled = true;
+    }
+
     // Call parseCSV and generateFormSteps here to populate the form
     questions = parseCSV(csvData);
     console.log('Parsed questions count:', questions.length); // DEBUG
@@ -458,6 +463,8 @@ function generateFormSteps(questions) {
                 this.classList.add('selected');
                 hiddenInput.value = this.dataset.value;
             }
+            // Update next button state after selection
+            updateNextButtonState();
         });
     });
 
@@ -490,9 +497,83 @@ function generateFormSteps(questions) {
     formSteps = document.querySelectorAll('.form-step'); // Update NodeList
     totalSteps = formSteps.length; // Update totalSteps
     console.log('Total form steps generated:', totalSteps); // DEBUG
+    // Add input listeners for next button after steps are generated
+    addInputListenersForNextButton();
+    // Set initial state of next button
+    updateNextButtonState();
 }
 
 // --- UI and Navigation Functions ---
+
+/**
+ * Enables or disables the next button based on the current step's input validity.
+ */
+function updateNextButtonState() {
+    if (!nextBtn) return;
+    // Default: disabled
+    nextBtn.disabled = true;
+    // Find the current step element
+    const currentStepDiv = Array.from(formSteps).find(
+        step => parseInt(step.dataset.step) === currentStep
+    );
+    if (!currentStepDiv) return;
+    // Check for choice button group
+    const choiceGroup = currentStepDiv.querySelector('.choice-button-group');
+    if (choiceGroup) {
+        const isMulti = choiceGroup.dataset.multiselect === 'true';
+        const hiddenInput = choiceGroup.querySelector('input[type="hidden"]');
+        if (isMulti) {
+            // Multi-select: at least one selected
+            if (hiddenInput.value && hiddenInput.value.split(',').filter(Boolean).length > 0) {
+                nextBtn.disabled = false;
+            }
+        } else {
+            // Single-select: must have a value
+            if (hiddenInput.value) {
+                nextBtn.disabled = false;
+            }
+        }
+        return;
+    }
+    // Check for text, number, date, currency, long_text, etc.
+    const input = currentStepDiv.querySelector('input:not([type="hidden"]), textarea');
+    if (input) {
+        if ((input.type === 'number' || input.type === 'date' || input.type === 'text' || input.tagName.toLowerCase() === 'textarea') && input.value && input.value.trim() !== '') {
+            nextBtn.disabled = false;
+            return;
+        }
+    }
+    // For repeating group, require at least one item
+    const repeatingGroup = currentStepDiv.querySelector('.repeating-group-container');
+    if (repeatingGroup) {
+        const items = repeatingGroup.querySelectorAll('.repeating-group-item');
+        if (items.length > 0) {
+            nextBtn.disabled = false;
+        }
+        return;
+    }
+    // For group fields, require all inputs to be filled
+    const groupContainer = currentStepDiv.querySelector('.group-container');
+    if (groupContainer) {
+        const groupInputs = groupContainer.querySelectorAll('input');
+        if (Array.from(groupInputs).every(inp => inp.value && inp.value.trim() !== '')) {
+            nextBtn.disabled = false;
+        }
+        return;
+    }
+    // For file upload, require a file
+    const fileInput = currentStepDiv.querySelector('input[type="file"]');
+    if (fileInput) {
+        if (fileInput.files && fileInput.files.length > 0) {
+            nextBtn.disabled = false;
+        }
+        return;
+    }
+    // For info steps, always enable
+    if (currentStepDiv.querySelector('.info-box')) {
+        nextBtn.disabled = false;
+    }
+}
 
 /**
  * Updates the form's visibility, progress bar, and navigation buttons based on the current step.
@@ -518,6 +599,9 @@ function updateFormView() {
         });
     }
 
+    // Attach input listeners for the current step
+    addInputListenersForNextButton();
+
     // The main progress bar still shows overall progress
     const progressPercentage = totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1)) * 100 : 0;
     progressBar.style.width = `${progressPercentage}%`;
@@ -532,6 +616,8 @@ function updateFormView() {
         nextBtn.classList.toggle('hidden', currentStep === totalSteps);
         submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
     }
+    // Update next button state for current step
+    updateNextButtonState();
 }
 
 /**
@@ -811,4 +897,25 @@ function showCustomAlert(message, type = 'info') {
             setTimeout(() => { if(tempAlert.parentNode) tempAlert.remove(); }, 500);
         }
     }, 3500);
+}
+
+// Add input event listeners to update next button state for text, number, date, textarea, file, group, and repeating group fields
+function addInputListenersForNextButton() {
+    formSteps.forEach(stepDiv => {
+        // Text, number, date, textarea
+        const inputs = stepDiv.querySelectorAll('input:not([type="hidden"]), textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', updateNextButtonState);
+        });
+        // File
+        const fileInput = stepDiv.querySelector('input[type="file"]');
+        if (fileInput) {
+            fileInput.addEventListener('change', updateNextButtonState);
+        }
+        // Group fields
+        const groupInputs = stepDiv.querySelectorAll('.group-container input');
+        groupInputs.forEach(input => {
+            input.addEventListener('input', updateNextButtonState);
+        });
+    });
 }

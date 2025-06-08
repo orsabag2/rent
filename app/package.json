@@ -2,11 +2,15 @@
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
     "@react-pdf/renderer": "^4.3.0",
-    "fontkit": "^2.0.4",
+    "html2pdf.js": "^0.10.3",
     "pdf-lib": "^1.17.1",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-quill": "^0.0.2"
   },
   "devDependencies": {
     "@types/react": "^19.1.6"
+  },
+  "scripts": {
+    "dev": "next dev"
   }
 }

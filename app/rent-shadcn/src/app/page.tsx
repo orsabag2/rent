@@ -10,6 +10,11 @@ import html2canvas from "html2canvas";
 import { FaCouch, FaSnowflake, FaBurn, FaUtensils, FaRegPlusSquare, FaRegSnowflake } from "react-icons/fa";
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { JSX } from "react";
+import fontkit from '@pdf-lib/fontkit';
+import IBMPlexSansHebrewRegular from './IBMPlexSansHebrew-Regular-base64.js';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import dynamic from 'next/dynamic';
 
 // Dynamically calculate group boundaries based on questions.length
 const questionGroups = [
@@ -32,6 +37,69 @@ function getGroupIndex(step: number) {
 const paymentStepIndex = questions.length;
 const summaryStepIndex = questions.length + 1;
 
+function base64ToUint8Array(base64: string) {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Contract template in Hebrew
+const contractTemplate = `<h1 style="text-align:center;">חוזה שכירות</h1>
+<p>שנערך ונחתם ב_______, ביום ___________ בחודש ___________ בשנת ___________.</p>
+<p>בין</p>
+<p>______________________________________, ת.ז. מס' _________________________.<br/>
+מרחוב _________________________________ ב- _____________________________.<br/>
+להלן לשם הקיצור: "בעל הדירה"<br/>
+מצד אחד</p>
+<p>לבין</p>
+<p>1. ____________________________________, ת.ז. מס' _________________________.<br/>
+2. ____________________________________, ת.ז. מס' _________________________.<br/>
+שניהם 'ביחד ולחוד '<br/>
+מרחוב _________________________________ ב- _____________________________.<br/>
+יכונו להלן יחדיו: "השוכר "<br/>
+מצד שני</p>
+<!-- ... (rest of your contract template here, you can add more HTML as needed) ... -->`;
+
+// Add this function for client-side PDF generation
+async function generateAndDownloadPdf(htmlContent: string) {
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
+  const fontBytes = base64ToUint8Array(IBMPlexSansHebrewRegular);
+  const customFont = await pdfDoc.embedFont(fontBytes);
+  const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
+  const { width, height } = page.getSize();
+  const fontSize = 14;
+  // Convert HTML to plain text (simple, for now)
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlContent;
+  const textContent = tempDiv.innerText;
+  const lines = textContent.split('\n');
+  let y = height - 40;
+  for (const line of lines) {
+    page.drawText(line, {
+      x: width - 40 - customFont.widthOfTextAtSize(line, fontSize),
+      y,
+      size: fontSize,
+      font: customFont,
+    });
+    y -= fontSize + 6;
+  }
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'contract.pdf';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+const ContractEditor = dynamic(() => import('./ContractEditor'), { ssr: false });
+
 export default function Home() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(() => Object.fromEntries(questions.map(q => [q.name, ""])));
@@ -49,6 +117,7 @@ export default function Home() {
   const [paymentError, setPaymentError] = useState('');
   const [summaryText, setSummaryText] = useState(() => questions.map(q => `${q.label}: ${form[q.name] || 'לא צוין'}`).join('\n'));
   const [error, setError] = useState("");
+  const [contractHtml, setContractHtml] = useState(contractTemplate);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -138,26 +207,6 @@ export default function Home() {
     }, 1000);
   };
 
-  // Replace the client-side PDF generation with a call to the server API
-  const downloadPdfWithPdfLib = async () => {
-    const response = await fetch('/api/generate-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ summaryText }),
-    });
-    if (!response.ok) {
-      alert('PDF generation failed');
-      return;
-    }
-    const blob = await response.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'חוזה_שכירות.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-muted" dir="rtl">
       {/* Header */}
@@ -197,7 +246,7 @@ export default function Home() {
             </div>
             {/* Summary step: active if on summary step */}
             <div className={`progress-section${isSummary ? ' active' : ''}`}
-              onClick={() => hasPaid && setStep(summaryStepIndex)}>
+              onClick={() => setStep(summaryStepIndex)}>
               <div className="progress-circle">{isSummary && (<svg className="checkmark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width={16} height={16}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>)}</div>
               <span className="progress-section-label">סיום והורדה</span>
             </div>
@@ -256,15 +305,8 @@ export default function Home() {
                 <CardHeader className="relative">
                   <CardTitle className="mb-4 question-title">החוזה שלך מוכן!</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <textarea
-                    className="w-full h-80 p-4 border rounded-xl bg-muted text-gray-800 text-lg rtl"
-                    value={summaryText}
-                    onChange={e => setSummaryText(e.target.value)}
-                  />
-                  <div className="flex gap-2 mt-6">
-                    <Button onClick={downloadPdfWithPdfLib} className="btn btn-primary">הורד חוזה PDF (pdf-lib)</Button>
-                  </div>
+                <CardContent className="step-content">
+                  <ContractEditor />
                 </CardContent>
               </Card>
             ) : (
