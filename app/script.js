@@ -126,15 +126,47 @@ try {
 
 // Add a function to dynamically add items to repeating groups
 function addRepeatingGroupItem(fieldName, fields) {
+    const labelMap = {
+        'name': 'שם',
+        'id': 'תעודת זהות',
+        'phone': 'טלפון',
+        'email': 'דוא"ל',
+        'address': 'כתובת'
+    };
     const container = document.getElementById(`${fieldName}Items`);
     const itemDiv = document.createElement('div');
-    itemDiv.classList.add('repeating-group-item', 'p-3', 'border', 'rounded', 'bg-white', 'space-y-2', 'mb-2');
-    itemDiv.innerHTML = fields.map(field => `
-        <div>
-            <label for="${fieldName}_${field}_${container.children.length}">${field}</label>
-            <input type="text" id="${fieldName}_${field}_${container.children.length}" name="${fieldName}_${field}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
-        </div>
-    `).join('');
+    itemDiv.classList.add('repeating-group-item', 'p-3', 'border', 'rounded', 'space-y-2', 'mb-2'); // Removed bg-white
+
+    const itemIndex = container.children.length + 1;
+    const titleDiv = document.createElement('div');
+    titleDiv.classList.add('font-semibold', 'mb-2', 'text-lg');
+    titleDiv.textContent = `שוכר חדש #${itemIndex}`;
+    itemDiv.appendChild(titleDiv);
+
+    fields.forEach(field => {
+        const displayLabel = labelMap[field] || field; // Use mapped label or original field name
+        let inputType = 'text';
+        if (field === 'email') {
+            inputType = 'email';
+        } else if (field === 'phone') {
+            inputType = 'tel';
+        }
+
+        const fieldContainer = document.createElement('div');
+        const labelElement = document.createElement('label');
+        labelElement.htmlFor = `${fieldName}_${field}_${container.children.length}`;
+        labelElement.textContent = displayLabel;
+        fieldContainer.appendChild(labelElement);
+
+        const inputElement = document.createElement('input');
+        inputElement.type = inputType;
+        inputElement.id = `${fieldName}_${field}_${container.children.length}`;
+        inputElement.name = `${fieldName}_${field}`;
+        inputElement.classList.add('mt-1', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'shadow-sm', 'focus:border-pink-500', 'focus:ring-pink-500', 'sm:text-sm');
+        fieldContainer.appendChild(inputElement);
+        
+        itemDiv.appendChild(fieldContainer);
+    });
     
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
@@ -187,79 +219,211 @@ function generateFormSteps(questions) {
         const fieldType = q['סוג שדה'];
         const fieldName = `question${stepCount}`;
 
-        let inputHtml = '';
-        let labelFor = `id="${fieldName}"`;
-        let inputType = 'text'; // Default
-        let placeholder = uxTip;
-        let options = [];
-        let isMultiSelect = false;
+        let inputElement = null;
 
         if (fieldType.startsWith('single_select:')) {
-            options = fieldType.replace('single_select: [', '').replace(']', '').split(',').map(s => s.trim().replace(/^\'|\'$/g, ''));
-            inputHtml = `
-                <div class="choice-button-group" data-field-name="${fieldName}">
-                    ${options.map(option => `<button type="button" class="choice-button" data-value="${option}">${option}</button>`).join('')}
-                </div>
-                <input type="hidden" name="${fieldName}" id="${fieldName}">
-            `;
+            const options = fieldType.replace('single_select: [', '').replace(']', '').split(',').map(s => s.trim().replace(/^\'|\'$/g, ''));
+            const choiceButtonGroup = document.createElement('div');
+            choiceButtonGroup.classList.add('choice-button-group');
+            choiceButtonGroup.dataset.fieldName = fieldName;
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.classList.add('choice-button');
+                button.dataset.value = option;
+                button.textContent = option;
+                choiceButtonGroup.appendChild(button);
+            });
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = fieldName;
+            hiddenInput.id = fieldName;
+            choiceButtonGroup.appendChild(hiddenInput);
+
+            inputElement = choiceButtonGroup; // Assign to inputElement
+
         } else if (fieldType.startsWith('multi_select:')) {
-            isMultiSelect = true;
-            options = fieldType.replace('multi_select: [', '').replace(']', '').split(',').map(s => s.trim().replace(/^\'|\'$/g, ''));
-            inputHtml = `
-                <div class="choice-button-group" data-field-name="${fieldName}" data-multiselect="true">
-                    ${options.map(option => `<button type="button" class="choice-button" data-value="${option}">${option}</button>`).join('')}
-                </div>
-                <input type="hidden" name="${fieldName}" id="${fieldName}">
-            `;
+            const options = fieldType.replace('multi_select: [', '').replace(']', '').split(',').map(s => s.trim().replace(/^\'|\'$/g, ''));
+            const choiceButtonGroup = document.createElement('div');
+            choiceButtonGroup.classList.add('choice-button-group');
+            choiceButtonGroup.dataset.fieldName = fieldName;
+            choiceButtonGroup.dataset.multiselect = 'true';
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.classList.add('choice-button');
+                button.dataset.value = option;
+                button.textContent = option;
+                choiceButtonGroup.appendChild(button);
+            });
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = fieldName;
+            hiddenInput.id = fieldName;
+            choiceButtonGroup.appendChild(hiddenInput);
+
+            inputElement = choiceButtonGroup; // Assign to inputElement
+
         } else if (fieldType === 'text') {
-            inputHtml = `<input type="text" ${labelFor} name="${fieldName}" placeholder="${placeholder}">`;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            inputElement = input;
         } else if (fieldType === 'number') {
-            inputHtml = `<input type="number" ${labelFor} name="${fieldName}" placeholder="${placeholder}">`;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            inputElement = input;
         } else if (fieldType === 'phone') {
-            inputHtml = `<input type="tel" ${labelFor} name="${fieldName}" placeholder="${placeholder}">`;
+            const input = document.createElement('input');
+            input.type = 'tel';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            inputElement = input;
         } else if (fieldType === 'address') {
-            inputHtml = `<input type="text" ${labelFor} name="${fieldName}" placeholder="${placeholder}">`;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            inputElement = input;
         } else if (fieldType === 'date') {
-            inputHtml = `<input type="date" ${labelFor} name="${fieldName}">`;
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.id = fieldName;
+            input.name = fieldName;
+            inputElement = input;
         } else if (fieldType === 'currency') {
-            inputHtml = `<input type="number" ${labelFor} name="${fieldName}" placeholder="${placeholder}" min="0">`;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            input.min = "0";
+            inputElement = input;
         } else if (fieldType === 'long_text') {
-            inputHtml = `<textarea ${labelFor} name="${fieldName}" rows="3" placeholder="${placeholder}"></textarea>`;
+            const textarea = document.createElement('textarea');
+            textarea.id = fieldName;
+            textarea.name = fieldName;
+            textarea.rows = 3;
+            textarea.placeholder = uxTip;
+            inputElement = textarea;
         } else if (fieldType === 'date_day_only') {
-            inputHtml = `<input type="number" ${labelFor} name="${fieldName}" placeholder="${placeholder}" min="1" max="31">`;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = fieldName;
+            input.name = fieldName;
+            input.placeholder = uxTip;
+            input.min = "1";
+            input.max = "31";
+            inputElement = input;
         } else if (fieldType.startsWith('repeating_group:')) {
             const groupFields = fieldType.replace('repeating_group: ', '').split(',').map(s => s.trim());
-            inputHtml = `
-                <div id="${fieldName}Group" class="repeating-group-container space-y-4 border p-4 rounded-lg bg-gray-50">
-                    <p class="font-semibold">${questionText}</p>
-                    <div id="${fieldName}Items" class="space-y-4"></div>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="addRepeatingGroupItem('${fieldName}', ${JSON.stringify(groupFields)})">הוסף פריט</button>
-                </div>
-            `;
+            const repeatingGroupContainer = document.createElement('div');
+            repeatingGroupContainer.id = `${fieldName}Group`;
+            repeatingGroupContainer.classList.add('repeating-group-container', 'space-y-4', 'border', 'p-4', 'rounded-lg');
+
+            const questionParagraph = document.createElement('p');
+            questionParagraph.classList.add('font-semibold');
+            questionParagraph.textContent = questionText;
+            repeatingGroupContainer.appendChild(questionParagraph);
+
+            const itemsDiv = document.createElement('div');
+            itemsDiv.id = `${fieldName}Items`;
+            itemsDiv.classList.add('space-y-4');
+            repeatingGroupContainer.appendChild(itemsDiv);
+
+            const addButton = document.createElement('button');
+            addButton.type = 'button';
+            addButton.classList.add('btn', 'btn-secondary', 'btn-sm');
+            addButton.textContent = 'הוסף שוכר';
+            addButton.onclick = () => addRepeatingGroupItem(fieldName, groupFields);
+            repeatingGroupContainer.appendChild(addButton);
+            
+            inputElement = repeatingGroupContainer; // Assign to inputElement
+            stepDiv.dataset.initialRepeatingGroupField = fieldName; // Mark for initial item addition
+            stepDiv.dataset.initialRepeatingGroupFields = JSON.stringify(groupFields); // Store fields
         } else if (fieldType.startsWith('group:')) {
             const groupFields = fieldType.replace('group: ', '').split(',').map(s => s.trim());
-            inputHtml = `
-                <div class="group-container space-y-4 border p-4 rounded-lg bg-gray-50">
-                    <p class="font-semibold">${questionText}</p>
-                    ${groupFields.map(field => `<label for="${fieldName}_${field}">${field}</label><input type="text" id="${fieldName}_${field}" name="${fieldName}_${field}">`).join('')}
-                </div>
-            `;
+            const groupContainer = document.createElement('div');
+            groupContainer.classList.add('group-container', 'space-y-4', 'border', 'p-4', 'rounded-lg', 'bg-gray-50');
+            const groupQuestionParagraph = document.createElement('p');
+            groupQuestionParagraph.classList.add('font-semibold');
+            groupQuestionParagraph.textContent = questionText;
+            groupContainer.appendChild(groupQuestionParagraph);
+            groupFields.forEach(field => {
+                const label = document.createElement('label');
+                label.htmlFor = `${fieldName}_${field}`;
+                label.textContent = field;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `${fieldName}_${field}`;
+                input.name = `${fieldName}_${field}`;
+                groupContainer.appendChild(label);
+                groupContainer.appendChild(input);
+            });
+            inputElement = groupContainer;
         } else if (fieldType === 'info') {
-            inputHtml = `<div class="info-box p-3 bg-blue-50 border-l-4 border-blue-500 text-blue-700 rounded-r-lg"><p>${questionText}</p><p class="text-sm text-blue-600">${uxTip}</p></div>`;
+            const infoBox = document.createElement('div');
+            infoBox.classList.add('info-box', 'p-3', 'bg-blue-50', 'border-l-4', 'border-blue-500', 'text-blue-700', 'rounded-r-lg');
+            const infoParagraph = document.createElement('p');
+            infoParagraph.textContent = questionText;
+            infoBox.appendChild(infoParagraph);
+            if (uxTip) {
+                const uxTipParagraph = document.createElement('p');
+                uxTipParagraph.classList.add('text-sm', 'text-blue-600');
+                uxTipParagraph.textContent = uxTip;
+                infoBox.appendChild(uxTipParagraph);
+            }
+            inputElement = infoBox;
         } else if (fieldType === 'file_upload') {
-            inputHtml = `<input type="file" ${labelFor} name="${fieldName}">`;
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.id = fieldName;
+            fileInput.name = fieldName;
+            inputElement = fileInput;
         }
 
-        stepDiv.innerHTML = `
-            <h2 class="step-title">${questionText}</h2>
-            ${uxTip ? `<p class="step-subtitle">${uxTip}</p>` : ''}
-            <div class="space-y-6">
-                <div>
-                    <label for="${fieldName}" class="hidden">${questionText}</label>
-                    ${inputHtml}
-                </div>
-            </div>
-        `;
+        // Create common structure for all step types
+        const titleElement = document.createElement('h2');
+        titleElement.classList.add('step-title');
+        titleElement.textContent = questionText;
+        stepDiv.appendChild(titleElement);
+
+        if (uxTip) {
+            const subtitleElement = document.createElement('p');
+            subtitleElement.classList.add('step-subtitle');
+            subtitleElement.textContent = uxTip;
+            stepDiv.appendChild(subtitleElement);
+        }
+
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('space-y-6');
+        const innerDiv = document.createElement('div');
+        const labelElement = document.createElement('label');
+        labelElement.htmlFor = fieldName;
+        labelElement.classList.add('hidden');
+        labelElement.textContent = questionText;
+        innerDiv.appendChild(labelElement);
+
+        if (inputElement) {
+            innerDiv.appendChild(inputElement);
+        } else { // This else block should now ideally not be hit if all types handled by inputElement
+            // Fallback for any unhandled inputHtml (though aim to eliminate this path)
+            console.warn(`Unhandled fieldType leading to direct innerHTML append: ${fieldType}`);
+        }
+
+        contentDiv.appendChild(innerDiv);
+        stepDiv.appendChild(contentDiv);
         formStepsContainer.appendChild(stepDiv);
         stepCount++;
     });
@@ -342,9 +506,22 @@ function generateFormSteps(questions) {
 function updateFormView() {
     console.log('Current Step:', currentStep, 'Total Steps:', totalSteps); // DEBUG
     if (formSteps.length > 0) {
-        formSteps.forEach(step => step.classList.remove('active'));
-        const activeStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
-        if (activeStep) activeStep.classList.add('active');
+        formSteps.forEach(step => {
+            if (parseInt(step.dataset.step) === currentStep) {
+                step.classList.add('active');
+                // If this step contains an initial repeating group, add an item to it
+                if (step.dataset.initialRepeatingGroupField && step.dataset.initialRepeatingGroupFields) {
+                    const fieldName = step.dataset.initialRepeatingGroupField;
+                    const groupFields = JSON.parse(step.dataset.initialRepeatingGroupFields);
+                    const container = document.getElementById(`${fieldName}Items`);
+                    if (container && container.children.length === 0) { // Only add if no items exist
+                        addRepeatingGroupItem(fieldName, groupFields);
+                    }
+                }
+            } else {
+                step.classList.remove('active');
+            }
+        });
     }
 
     // The main progress bar still shows overall progress

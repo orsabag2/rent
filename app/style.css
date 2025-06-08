@@ -77,11 +77,10 @@ header {
 
 .sidebar-progress-container {
     flex-shrink: 0;
-    width: 250px;
-    padding-top: 2.5rem; /* Matches p-10 of main card */
+    width: 200px; /* Reduced width */
+    padding-top: 2rem; 
     display: flex;
     flex-direction: column;
-    /* No align-items: center here, let children align */
 }
 
 /* Hidden old horizontal progress bar */
@@ -100,13 +99,12 @@ header {
 #progressBarSections::before {
     content: '';
     position: absolute;
-    top: 30px; /* Start from the center of the first circle */
-    bottom: 30px; /* End at the center of the last circle */
-    right: 19px; /* Setting back to the calculated correct position */
-    width: 2px; /* Thickness of the line, matching circle border */
-    background-color: #e5e7eb; /* Inactive line color */
+    top: 12px; /* Adjusted to center of even smaller circle */
+    bottom: 12px; /* Adjusted to center of even smaller circle */
+    right: 11px; /* Adjusted position for even smaller circle */
+    width: 2px;
+    background-color: #e5e7eb;
     z-index: 0;
-    /* Removed transform: translateX(50%); to simplify positioning */
 }
 
 /* Individual progress section item */
@@ -114,31 +112,40 @@ header {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 10px 0; /* Vertical padding around each section item */
-    padding-right: 55px; /* Make space for absolutely positioned circle on the right */
+    padding: 1px 0; /* Adjusted vertical padding for smaller circle */
+    padding-right: 25px; /* Adjusted space for even smaller circle */
     cursor: pointer;
     transition: all 0.3s ease-in-out;
-    justify-content: flex-end; /* Align content to the right (for RTL) */
-    min-height: 60px; /* Ensure enough height for line segments */
-    flex-direction: row-reverse; /* Order: label then circle for RTL */
-    /* Removed border: 1px solid green; */
-    /* Removed background-color: rgba(0, 255, 0, 0.1); */
+    justify-content: flex-end; 
+    min-height: 20px; /* Adjusted min-height for even tighter spacing */
+    flex-direction: row-reverse;
+    margin-bottom: 0.15rem; /* Adjusted consistent spacing between steps */
+}
+
+/* Ensure the first item doesn't have an extra top margin if space-y is used */
+.progress-section:first-child {
+    margin-top: 0;
+}
+
+/* Ensure the last item doesn't have an extra bottom margin */
+.progress-section:last-child {
+    margin-bottom: 0;
 }
 
 /* The circle representing each section */
 .progress-circle {
-    width: 40px; /* Size of the circle */
-    height: 40px;
+    width: 20px; /* Even Smaller size of the circle */
+    height: 20px; /* Even Smaller size of the circle */
     border-radius: 50%;
-    background-color: white; /* Inner color of the circle (reverted) */
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    z-index: 1; /* Above the line */
-    position: absolute; /* Added: Absolute positioning */
-    right: 0; /* Added: Pin to the right */
-    border: 2px solid #e5e7eb; /* Inactive border (gray) */
+    z-index: 1;
+    position: absolute;
+    right: 0;
+    border: 2px solid #e5e7eb;
     transition: all 0.3s ease-in-out;
 }
 
@@ -180,16 +187,16 @@ header {
 }
 
 .progress-circle .checkmark-icon {
-    width: 60%; /* Size of the checkmark relative to circle */
-    height: 60%;
-    color: white; /* Explicitly set color for the SVG */
-    display: block; /* Ensure it's rendered as a block element */
+    width: 75%; /* Increased checkmark size relative to even smaller circle */
+    height: 75%;
+    color: white;
+    display: block;
 }
 
 /* Label for each progress section */
 .progress-section-label {
-    margin-right: 0; /* Reset previous margin-right */
-    font-size: 0.9rem;
+    margin-right: 0;
+    font-size: 0.85rem; /* Slightly smaller font size */
     font-weight: 500;
     color: #6b7280;
     transition: color 0.3s ease-in-out;
