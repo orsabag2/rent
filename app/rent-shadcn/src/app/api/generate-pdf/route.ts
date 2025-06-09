@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import path from 'path';
 import { rgb } from 'pdf-lib';
 
 export async function POST(req: NextRequest) {

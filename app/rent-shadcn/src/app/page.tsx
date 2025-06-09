@@ -1,20 +1,12 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { questions } from "./questions";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { FaCouch, FaSnowflake, FaBurn, FaUtensils, FaRegPlusSquare, FaRegSnowflake } from "react-icons/fa";
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { JSX } from "react";
-import fontkit from '@pdf-lib/fontkit';
-import IBMPlexSansHebrewRegular from './IBMPlexSansHebrew-Regular-base64.js';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import dynamic from 'next/dynamic';
+import { questions } from "./questions";
 
 // Dynamically calculate group boundaries based on questions.length
 const questionGroups = [
@@ -37,87 +29,20 @@ function getGroupIndex(step: number) {
 const paymentStepIndex = questions.length;
 const summaryStepIndex = questions.length + 1;
 
-function base64ToUint8Array(base64: string) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-// Contract template in Hebrew
-const contractTemplate = `<h1 style="text-align:center;">חוזה שכירות</h1>
-<p>שנערך ונחתם ב_______, ביום ___________ בחודש ___________ בשנת ___________.</p>
-<p>בין</p>
-<p>______________________________________, ת.ז. מס' _________________________.<br/>
-מרחוב _________________________________ ב- _____________________________.<br/>
-להלן לשם הקיצור: "בעל הדירה"<br/>
-מצד אחד</p>
-<p>לבין</p>
-<p>1. ____________________________________, ת.ז. מס' _________________________.<br/>
-2. ____________________________________, ת.ז. מס' _________________________.<br/>
-שניהם 'ביחד ולחוד '<br/>
-מרחוב _________________________________ ב- _____________________________.<br/>
-יכונו להלן יחדיו: "השוכר "<br/>
-מצד שני</p>
-<!-- ... (rest of your contract template here, you can add more HTML as needed) ... -->`;
-
-// Add this function for client-side PDF generation
-async function generateAndDownloadPdf(htmlContent: string) {
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-  const fontBytes = base64ToUint8Array(IBMPlexSansHebrewRegular);
-  const customFont = await pdfDoc.embedFont(fontBytes);
-  const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
-  const { width, height } = page.getSize();
-  const fontSize = 14;
-  // Convert HTML to plain text (simple, for now)
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = htmlContent;
-  const textContent = tempDiv.innerText;
-  const lines = textContent.split('\n');
-  let y = height - 40;
-  for (const line of lines) {
-    page.drawText(line, {
-      x: width - 40 - customFont.widthOfTextAtSize(line, fontSize),
-      y,
-      size: fontSize,
-      font: customFont,
-    });
-    y -= fontSize + 6;
-  }
-  const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'contract.pdf';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 const ContractEditor = dynamic(() => import('./ContractEditor'), { ssr: false });
 
 export default function Home() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(() => Object.fromEntries(questions.map(q => [q.name, ""])));
-  const [open, setOpen] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [returnToSummary, setReturnToSummary] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [showOverlayCards, setShowOverlayCards] = useState(false);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [editForm, setEditForm] = useState(form);
-  const [downloading, setDownloading] = useState(false);
   const [hasPaid, setHasPaid] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState({ card: '', exp: '', cvc: '' });
   const [paymentError, setPaymentError] = useState('');
-  const [summaryText, setSummaryText] = useState(() => questions.map(q => `${q.label}: ${form[q.name] || 'לא צוין'}`).join('\n'));
   const [error, setError] = useState("");
-  const [contractHtml, setContractHtml] = useState(contractTemplate);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -127,6 +52,11 @@ export default function Home() {
     const q = questions[step];
     // Validation: required for all except summary/payment
     if (q) {
+      // Make landlord and tenant ID numbers required
+      if ((q.name === "idNumber" || q.name === "tenantIdNumber") && !form[q.name]) {
+        setError("אנא מלא/י שדה זה (מספר תעודת זהות חובה)");
+        return;
+      }
       if ((q.type === "text" || q.type === "number" || q.type === "date") && !form[q.name]) {
         setError("אנא מלא/י שדה זה");
         return;
@@ -163,31 +93,8 @@ export default function Home() {
     }, 400);
   };
 
-  // Find current group and questions in group
-  const groupIdx = getGroupIndex(step);
-  const group = questionGroups[groupIdx];
-  const groupQuestions = questions.slice(group.start, group.end);
-  const groupStep = step - group.start + 1;
-  const groupTotal = group.end - group.start;
-
   // Update isSummary to be summaryStepIndex
   const isSummary = step === summaryStepIndex;
-
-  // Update summaryText when form changes and not editing
-  useEffect(() => {
-    if (!isSummary) {
-      setSummaryText(questions.map(q => `${q.label}: ${form[q.name] || 'לא צוין'}`).join('\n'));
-    }
-  }, [form, isSummary]);
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handlePreview = () => {
-    setEditForm(form);
-    setPreviewOpen(true);
-  };
 
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPaymentDetails({ ...paymentDetails, [e.target.name]: e.target.value });
@@ -205,6 +112,22 @@ export default function Home() {
       setHasPaid(true);
       setStep(summaryStepIndex); // Go to summary
     }, 1000);
+  };
+
+  const isCurrentQuestionAnswered = () => {
+    const q = questions[step];
+    if (!q) return false;
+    const value = form[q.name];
+    if (q.type === "text" || q.type === "number" || q.type === "date") {
+      return value && value !== "";
+    }
+    if (q.type === "select") {
+      return value && value !== "";
+    }
+    if (q.type === "multiselect") {
+      return value && value.split(",").filter(Boolean).length > 0;
+    }
+    return false;
   };
 
   return (
@@ -301,14 +224,11 @@ export default function Home() {
                 </CardContent>
               </Card>
             ) : isSummary ? (
-              <Card className="w-full rounded-xl p-6 sm:p-10 pb-24 shadow-xl max-w-2xl mx-auto">
-                <CardHeader className="relative">
-                  <CardTitle className="mb-4 question-title">החוזה שלך מוכן!</CardTitle>
-                </CardHeader>
-                <CardContent className="step-content">
-                  <ContractEditor />
-                </CardContent>
-              </Card>
+              <div className="editor-fullscreen bg-white min-h-[80vh] p-0 m-0 w-full">
+                <div className="w-full max-w-none flex flex-col">
+                  <ContractEditor form={form} />
+                </div>
+              </div>
             ) : (
               <Card className={`w-full rounded-xl p-3 sm:p-6 pb-10 transition-transform duration-400 ${animating ? (direction === 'forward' ? 'card-slide-up' : 'card-slide-down') : ''} max-w-2xl mx-auto`}>
                 <CardHeader className="relative">
@@ -340,6 +260,12 @@ export default function Home() {
                             value={form[q.name]}
                             onChange={handleChange}
                             className="rtl"
+                            onKeyDown={e => {
+                              if (e.key === "Enter" && isCurrentQuestionAnswered()) {
+                                e.preventDefault();
+                                handleNext();
+                              }
+                            }}
                           />
                         );
                       }
@@ -423,7 +349,7 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between mt-8">
                     {!isSummary && !returnToSummary ? (
-                      <Button onClick={handleNext} className="btn btn-primary">
+                      <Button onClick={handleNext} className="btn btn-primary" disabled={!isCurrentQuestionAnswered()}>
                         <span>הבא</span>
                         <svg className="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" className="path-stroke" d="M9 5l-7 7 7 7" /></svg>
                       </Button>

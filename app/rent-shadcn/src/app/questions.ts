@@ -1,5 +1,6 @@
 export const questions = [
   { label: "בוא נתחיל בשמך – איך נכתוב אותך בתור בעל הבית? 🙂", name: "fullName", type: "text", placeholder: "כמו בתעודת זהות – שם פרטי + שם משפחה" },
+  { label: "מה מספר תעודת הזהות של בעל הדירה?", name: "idNumber", type: "text", placeholder: "מספר ת.ז. של בעל הדירה" },
   { label: "ואיך אפשר לפנות אליך אם נצטרך?", name: "phone", type: "text", placeholder: "מספר טלפון שיש לך עליו וואטסאפ 📱" },
   { label: "ולמקרה שנצטרך – איפה אתה גר ביומיום?", name: "homeAddress", type: "text", placeholder: "רק לצורך ניסוח החוזה. לא נשתמש בזה מעבר" },
   { label: "איפה נמצא הנכס שאתה משכיר?", name: "propertyAddress", type: "text", placeholder: "עיר, רחוב, מספר, דירה – כמה שיותר מדויק 🏠" },
@@ -9,6 +10,7 @@ export const questions = [
   { label: "יש מעלית בבניין?", name: "elevator", type: "select", options: ["כן", "לא"], placeholder: "כדי שהשוכרים לא יופתעו..." },
   { label: "השארת בדירה משהו שתרצה לציין? נגיד רהיטים או מכשירים?", name: "leftItems", type: "multiselect", options: ["מזגן", "ספה", "כריים", "תנור", "מקרר", "אחר"], icons: { "מזגן": "FaSnowflake", "ספה": "FaCouch", "כריים": "FaUtensils", "תנור": "FaBurn", "מקרר": "FaRegSnowflake", "אחר": "FaRegPlusSquare" }, placeholder: "למשל: מיטה זוגית, ארון, מקרר..." },
   { label: "מי השוכר שאתה סוגר איתו את החוזה?", name: "tenantName", type: "text", placeholder: "שם מלא של כל שוכר" },
+  { label: "מה מספר תעודת הזהות של השוכר?", name: "tenantIdNumber", type: "text", placeholder: "מספר ת.ז. של השוכר" },
   { label: "כמה דיירים אתה הולך להכניס לחוזה?", name: "tenantCount", type: "number", placeholder: "אפשר שוכר אחד או כמה – תלוי במצב" },
   { label: "מה הכתובת הנוכחית של הדייר שלך?", name: "tenantAddress", type: "text", placeholder: "כתובת נוכחית של השוכר, לצרכי החוזה בלבד" },
   { label: "יש מישהו אחר שמשלם בשבילו?", name: "otherPayer", type: "select", options: ["כן", "לא"], placeholder: "למשל הורה או גוף תומך" },
