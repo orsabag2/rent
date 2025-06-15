@@ -1,7 +1,17 @@
+import React from "react";
 import ContractPreviewClient from './ContractPreviewClient';
+import { type Metadata } from 'next';
 
-export default async function ContractPreviewPage(propsPromise: Promise<{ params: { id: string } }>) {
-  const { params } = await propsPromise;
+interface PageProps {
+  params: { id: string };
+}
+
+export default function ContractPreviewPage({ params }: PageProps) {
   const { id } = params;
   return <ContractPreviewClient id={id} />;
-} 
+}
+
+// Remove or implement generateStaticParams if you need static generation
+// export async function generateStaticParams() {
+//   return [];
+// } 
