@@ -1,22 +1,98 @@
+import type { Question } from "./page";
+
+export async function loadQuestions(): Promise<Question[]> {
+  const res = await fetch('/complete_rental_questions_with_title.json');
+  const data = await res.json();
+  // Map the JSON structure to a flat array of open field questions, preserving all properties
+  return (data as Question[]).map((q, idx) => ({
+    ...q,
+    label: q.label || `אנא הזן ערך עבור ${q.name}`,
+    name: q.name || `q${idx + 1}`,
+    type: q.type || q.inputType || 'text',
+    section: (q.section || q["סעיף"] || 'שונות').trim(),
+  }));
+}
+
+export const groupedQuestions = [
+  {
+    group: "עליך",
+    questions: [
+      {
+        name: "landlordName",
+        label: "איך נרשום אותך בחוזה? (שם מלא כמו בתעודת זהות) 🙂",
+        type: "text"
+      },
+      {
+        name: "landlordId",
+        label: "מה מספר תעודת הזהות שלך?",
+        type: "text"
+      },
+      {
+        name: "landlordPhone",
+        label: "איך אפשר ליצור איתך קשר? (טלפון או אימייל)",
+        type: "text"
+      }
+    ]
+  },
+  {
+    group: "על הדירה",
+    questions: [
+      {
+        name: "propertyAddress",
+        label: "איפה הדירה נמצאת? (כתובת מלאה, כולל עיר ורחוב)",
+        type: "text"
+      },
+      {
+        name: "hasParking",
+        label: "יש חניה שמגיעה עם הדירה?",
+        type: "select",
+        options: ["כן", "לא"]
+      },
+      {
+        name: "hasStorage",
+        label: "יש מחסן שמגיע עם הדירה?",
+        type: "select",
+        options: ["כן", "לא"]
+      },
+      {
+        name: "furniture",
+        label: "הדירה מרוהטת? אילו פריטים נשארים?",
+        type: "multiselect",
+        options: ["מיטה", "ספה", "מקרר", "תנור", "ארון", "אחר"]
+      }
+    ]
+  }
+];
+
 export const questions = [
   { label: "בוא נתחיל בשמך – איך נכתוב אותך בתור בעל הבית? 🙂", name: "fullName", type: "text", placeholder: "כמו בתעודת זהות – שם פרטי + שם משפחה" },
   { label: "מה מספר תעודת הזהות של בעל הדירה?", name: "idNumber", type: "text", placeholder: "מספר ת.ז. של בעל הדירה" },
   { label: "ואיך אפשר לפנות אליך אם נצטרך?", name: "phone", type: "text", placeholder: "מספר טלפון שיש לך עליו וואטסאפ 📱" },
   { label: "ולמקרה שנצטרך – איפה אתה גר ביומיום?", name: "homeAddress", type: "text", placeholder: "רק לצורך ניסוח החוזה. לא נשתמש בזה מעבר" },
-  { label: "איפה נמצא הנכס שאתה משכיר?", name: "propertyAddress", type: "text", placeholder: "עיר, רחוב, מספר, דירה – כמה שיותר מדויק 🏠" },
+  { label: "איפה נמצא הנכס שאתה משכיר? (כתובת מלאה)", name: "propertyAddress", type: "text", placeholder: "עיר, רחוב, מספר, דירה, כניסה – כמה שיותר מדויק 🏠" },
+  { label: "מה שם הרחוב של הדירה?", name: "street", type: "text", placeholder: "לדוגמה: גאולים" },
+  { label: "מה מספר הדירה?", name: "apartmentNumber", type: "text", placeholder: "לדוגמה: 14" },
+  { label: "באיזו קומה הדירה?", name: "floor", type: "text", placeholder: "לדוגמה: 7 או קרקע" },
+  { label: "מה מספר הכניסה?", name: "entrance", type: "text", placeholder: "לדוגמה: 1" },
+  { label: "באיזו עיר הדירה?", name: "city", type: "text", placeholder: "לדוגמה: תל אביב" },
   { label: "יש חניה ששייכת לדירה?", name: "parking", type: "select", options: ["כן", "לא"], placeholder: "אם כן – נכניס אותה לחוזה" },
+  { label: "מה מספר החניה?", name: "parkingNumber", type: "text", placeholder: "לדוגמה: 70" },
   { label: "יש גם מחסן שמגיע עם הדירה?", name: "storage", type: "select", options: ["כן", "לא"], placeholder: "לא חובה, אבל שווה לציין אם יש" },
-  { label: "באיזו קומה הדירה שלך נמצאת?", name: "floor", type: "number", placeholder: "אם זה בניין, באיזו קומה היא? אפשר גם 'קרקע'" },
-  { label: "יש מעלית בבניין?", name: "elevator", type: "select", options: ["כן", "לא"], placeholder: "כדי שהשוכרים לא יופתעו..." },
-  { label: "השארת בדירה משהו שתרצה לציין? נגיד רהיטים או מכשירים?", name: "leftItems", type: "multiselect", options: ["מזגן", "ספה", "כריים", "תנור", "מקרר", "אחר"], icons: { "מזגן": "FaSnowflake", "ספה": "FaCouch", "כריים": "FaUtensils", "תנור": "FaBurn", "מקרר": "FaRegSnowflake", "אחר": "FaRegPlusSquare" }, placeholder: "למשל: מיטה זוגית, ארון, מקרר..." },
+  { label: "מה מספר המחסן?", name: "storageNumber", type: "text", placeholder: "לדוגמה: 29" },
   { label: "מי השוכר שאתה סוגר איתו את החוזה?", name: "tenantName", type: "text", placeholder: "שם מלא של כל שוכר" },
   { label: "מה מספר תעודת הזהות של השוכר?", name: "tenantIdNumber", type: "text", placeholder: "מספר ת.ז. של השוכר" },
-  { label: "כמה דיירים אתה הולך להכניס לחוזה?", name: "tenantCount", type: "number", placeholder: "אפשר שוכר אחד או כמה – תלוי במצב" },
+  { label: "מה מספר הטלפון של השוכר?", name: "tenantPhone", type: "text", placeholder: "לדוגמה: 052-7654321" },
   { label: "מה הכתובת הנוכחית של הדייר שלך?", name: "tenantAddress", type: "text", placeholder: "כתובת נוכחית של השוכר, לצרכי החוזה בלבד" },
-  { label: "יש מישהו אחר שמשלם בשבילו?", name: "otherPayer", type: "select", options: ["כן", "לא"], placeholder: "למשל הורה או גוף תומך" },
   { label: "מתי השוכר שלך נכנס לגור בדירה?", name: "moveInDate", type: "date", placeholder: "תאריך התחלה של השכירות" },
-  { label: "לכמה זמן אתם סוגרים את החוזה?", name: "contractDuration", type: "number", placeholder: "רוב החוזים הם לשנה – אבל זה לגמרי תלוי בך" },
+  { label: "מה תאריך הסיום של תקופת השכירות?", name: "rentEndDate", type: "date", placeholder: "תאריך סיום השכירות" },
   { label: "כמה שכר דירה אתה גובה כל חודש?", name: "monthlyRent", type: "text", placeholder: "כמה ייכנס לך לחשבון כל חודש 💸" },
+  { label: "יש תוספת לשכר הדירה באופציה?", name: "optionAmount", type: "text", placeholder: "לדוגמה: 6,100" },
+  { label: "מה סכום הפיקדון?", name: "depositAmount", type: "text", placeholder: "לדוגמה: 12,000" },
+  { label: "מה סכום שטר החוב?", name: "guaranteeAmount", type: "text", placeholder: "לדוגמה: 70,000" },
+  { label: "מה סכום הערבות הבנקאית?", name: "bankGuaranteeAmount", type: "text", placeholder: "לדוגמה: 25,000" },
+  { label: "כמה ערבים יהיו?", name: "guarantorsCount", type: "text", placeholder: "לדוגמה: 2" },
+  { label: "יש מישהו אחר שמשלם בשבילו?", name: "otherPayer", type: "select", options: ["כן", "לא"], placeholder: "למשל הורה או גוף תומך" },
+  { label: "לכמה זמן אתם סוגרים את החוזה?", name: "contractDuration", type: "number", placeholder: "רוב החוזים הם לשנה – אבל זה לגמרי תלוי בך" },
   { label: "באיזה תאריך בכל חודש תרצה לקבל את התשלום?", name: "rentDueDay", type: "text", placeholder: "למשל: בכל 1 לחודש" },
   { label: "מה הדרך הכי נוחה לך לקבל את התשלום?", name: "preferredPaymentMethod", type: "select", options: ["העברה בנקאית", "שיקים", "אחר"], placeholder: "מה שהכי נוח לך" },
   { label: "איך השוכר יעביר את התשלום?", name: "paymentDetails", type: "text", placeholder: "למשל: צ׳קים, העברה בנקאית, פיקדון" },

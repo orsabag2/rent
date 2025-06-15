@@ -197,7 +197,7 @@
 }
 
 .progress-section.active .progress-circle {
-    border-color: #e5e7eb;
+    border-color: #71CA76 !important;
     background-color: white;
 }
 
@@ -230,6 +230,11 @@
 .progress-section.completed .progress-section-label {
     color: #1f2937;
     font-weight: 600;
+}
+
+.progress-section.active .progress-section-label {
+    color: #4a8c4e;
+    font-weight: 700;
 }
 
 .progress-section:hover .progress-circle {
@@ -538,4 +543,15 @@ box-shadow: 0 4px 24px rgba(0,0,0,0.06);
 
 .tiptap-docs-container {
   background: transparent !important;
+}
+
+/* RTL share modal: move close button to left */
+.rtl-share-modal [data-slot="dialog-close"] {
+  right: auto !important;
+  left: 1rem !important;
+}
+
+.hebrew-serif-title {
+  font-family: 'Noto Serif Hebrew', 'David Libre', David, "Times New Roman", Times, serif;
+  letter-spacing: 0.01em;
 }

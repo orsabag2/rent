@@ -1,5 +1,5 @@
 "use client";
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,13 @@ import ListItem from '@tiptap/extension-list-item';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import TextAlign from '@tiptap/extension-text-align';
 import { FaFilePdf } from 'react-icons/fa';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import SignaturePad from '@/components/ui/SignaturePad';
+import { generalClauses } from './general_contract_clauses';
 
 type ContractEditorProps = {
   form: Record<string, string>;
+  questions: any[];
 };
 
 function base64ToUint8Array(base64: string) {
@@ -34,7 +38,7 @@ function base64ToUint8Array(base64: string) {
 }
 
 // Improved PDF export: render headings, bold, and paragraphs with better structure and spacing
-async function generateAndDownloadPdf(htmlContent: string) {
+async function generateAndDownloadPdf(htmlContent: string, signatureImageDataUrl?: string) {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
   const fontBytes = base64ToUint8Array(IBMPlexSansHebrewRegular);
@@ -81,6 +85,10 @@ async function generateAndDownloadPdf(htmlContent: string) {
     y = height - 60;
   }
 
+  // Add variables to store the Y positions
+  let landlordRoleY: number | null = null;
+  let tenantRoleY: number | null = null;
+
   // Helper to draw text with alignment and wrapping, with page break support
   function drawAlignedText(text: string, font: any, fontSize: number, align: string = 'right', extraY = 0) {
     if (!text.trim()) return;
@@ -102,6 +110,13 @@ async function generateAndDownloadPdf(htmlContent: string) {
         x = width - rightMargin - font.widthOfTextAtSize(line, fontSize);
       } else if (align === 'center') {
         x = (width - font.widthOfTextAtSize(line, fontSize)) / 2;
+      }
+      // Detect landlord and tenant role labels
+      if (line.includes('בעל הדירה') && landlordRoleY === null) {
+        landlordRoleY = y;
+      }
+      if (line.includes('השוכר/ים') && tenantRoleY === null) {
+        tenantRoleY = y;
       }
       page.drawText(line, {
         x,
@@ -217,7 +232,22 @@ async function generateAndDownloadPdf(htmlContent: string) {
   const elements = Array.from(tempDiv.childNodes);
   elements.forEach(el => renderNode(el));
 
+  // Draw the signature image if provided and landlordRoleY is found
+  if (signatureImageDataUrl && landlordRoleY !== null) {
+    const pngBytes = await fetch(signatureImageDataUrl).then(res => res.arrayBuffer());
+    const pngImage = await pdfDoc.embedPng(pngBytes);
+    const pngDims = pngImage.scale(0.4); // scale to fit
+    // Place the image a bit below the landlordRoleY line
+    page.drawImage(pngImage, {
+      x: width - rightMargin - pngDims.width, // right align
+      y: landlordRoleY - pngDims.height - 10, // a bit below the text
+      width: pngDims.width,
+      height: pngDims.height,
+    });
+  }
+
   const pdfBytes = await pdfDoc.save();
+  const metadata = { landlordRoleY, tenantRoleY };
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -225,120 +255,333 @@ async function generateAndDownloadPdf(htmlContent: string) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  return { pdfBlob: blob, metadata };
 }
 
-const contractTemplate = `
-<h1 style="text-align:center;"><b>חוזה שכירות</b></h1>
-<p>שנערך ונחתם ביום {{moveInDate}} ב- {{propertyAddress}}</p>
+function fillPlaceholders(text: string, form: Record<string, string>) {
+  if (!text) return '';
+  // Replace all placeholders with value or 'לא נענה' in gray if missing
+  return text.replace(/{{(.*?)}}/g, (_, key) => (
+    form[key] !== undefined && form[key] !== ''
+      ? form[key]
+      : '<span style="color: #888">לא נענה</span>'
+  ));
+}
 
-<p><b>בין:</b><br/>
-<b>בעל הדירה</b><br/>
-שם: {{fullName}}<br/>
-ת.ז.: {{idNumber}}<br/>
-כתובת: {{homeAddress}}</p>
+// Helper to render subclauses as nested list
+function renderSubclauses(text: string) {
+  if (!text) return '';
+  // Find all subclauses (e.g., 1.1 ... 1.2 ...), even if not separated by newlines
+  const subclauseRegex = /([0-9]+\.[0-9]+(\.[0-9]+)?)[ .:;\-]+([^0-9]+)/g;
+  let items: string[] = [];
+  let lastIndex = 0;
+  let match;
+  let foundAny = false;
+  while ((match = subclauseRegex.exec(text)) !== null) {
+    foundAny = true;
+    // Add any text before the first subclause as a separate item
+    if (match.index > lastIndex) {
+      const before = text.slice(lastIndex, match.index).trim();
+      if (before) items.push(`<li style='margin-bottom:4px;'>${before}</li>`);
+    }
+    items.push(`<li style='margin-bottom:4px;'><span style='font-weight:bold;'>${match[1]}</span> ${match[3].trim()}</li>`);
+    lastIndex = subclauseRegex.lastIndex;
+  }
+  // Add any remaining text after the last subclause
+  if (foundAny && lastIndex < text.length) {
+    const after = text.slice(lastIndex).trim();
+    if (after) items.push(`<li style='margin-bottom:4px;'>${after}</li>`);
+  }
+  // If no subclauses found, fallback to splitting by newlines
+  if (!foundAny) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    items = lines.map(line => `<li style='margin-bottom:4px;'>${line}</li>`);
+  }
+  if (items.length > 0) {
+    return `<ol style='margin:0 0 0 0; padding-right:24px;'>${items.join('')}</ol>`;
+  }
+  return `<div style='white-space:pre-line;'>${text}</div>`;
+}
 
-<p><b>לבין השוכרים (יחד ולחוד):</b></p>
-<p>שם: {{tenantName}} ת.ז.: {{tenantIdNumber}}</p>
-<p>כתובת: {{tenantAddress}}</p>
-
-<p></p><h2><b>1. מבוא</b></h2>
-<p>1.1 בעל הדירה הוא הבעלים הרשום של דירה בת {{floor}} חדרים עם הצמדותיה {{parking}}, {{storage}}, {{elevator}}, ברחוב {{propertyAddress}} בעיר ________ (להלן: "הדירה").<br/>
-1.2 בעל הדירה מעוניין להשכיר את הדירה לשוכר, והשוכר מעוניין לשכור אותה בשכירות בלתי מוגנת, בהתאם לתנאים ולהתחייבויות המפורטים בחוזה זה.<br/>
-1.3 הצדדים מצהירים כי אין יחולו על חוזה זה הוראות חוק הגנת הדייר.</p>
-<p></p><h2><b>2. הצהרות הצדדים</b></h2>
-<p>2.1 בעל הדירה מצהיר:<br/>
-2.1.1 לא העניק לצד שלישי זכויות נוגדות בדירה, ואין מניעה חוקית לשימוש בדירה למגורים ולחתימת חוזה זה.<br/>
-2.1.2 הדירה ראויה למגורים, ריקה מכל אדם וחפץ פרט לפריטים: {{leftItems}}.<br/>
-2.2 השוכר מצהיר:<br/>
-2.2.1 קרא והבין את חוזה זה, בדק את הדירה ומצא אותה מתאימה למטרותיו ובמצב תקין, פרט לפגמים: {{apartmentDefects}}.<br/>
-2.2.2 השוכר מאשר כי קיבל את הדירה כפי שהיא, לאחר בדיקה פיזית, ומתחייב לא לטעון בעתיד לפגמים שלא תועדו.</p>
-<p></p><h2><b>3. מטרת השכירות</b></h2>
-<p>השוכר ישתמש בדירה אך ורק למגורים לאורך כל תקופת השכירות. השוכר מתחייב שלא לבצע שינויים, הריסות או תוספות בדירה ללא אישור מראש ובכתב של בעל הדירה.</p>
-<p></p><h2><b>4. תקופת השכירות</b></h2>
-<p>4.1 תקופת השכירות תימשך {{contractDuration}} חודשים, תחל ביום {{moveInDate}} ותסתיים ביום __________.</p>
-<p></p><h2><b>5. דמי שכירות</b></h2>
-<p>5.1 השוכר ישלם לבעל הדירה {{monthlyRent}} ש"ח לחודש.<br/>
-5.2 התשלום יבוצע ב{{preferredPaymentMethod}}. פרטי תשלום: {{paymentDetails}}.<br/>
-5.3 השוכר ישלם את מלוא דמי השכירות גם אם לא עשה שימוש בדירה.<br/>
-5.4 מועד התשלום יהיה בכל {{rentDueDay}} לחודש. מועד התשלום הראשון: {{firstPaymentDate}}.<br/>
-5.5 השוכר לא יבצע קיזוזים מדמי השכירות ללא הסכמה מראש ובכתב מבעל הדירה.</p>
-<p></p><h2><b>6. תקופת האופציה</b></h2>
-<p>6.1 לשוכר זכות להאריך את השכירות ב-{{extensionOption}} חודשים נוספים. תוספת שכר דירה: {{extensionRentAddition}}.<br/>
-6.2 תנאים למימוש האופציה: הודעה מראש, חידוש בטחונות: {{guarantees}}.</p>
-<p></p><h2><b>7. יידוע לקראת סוף תקופת האופציה</b></h2>
-<p>7.1 בעל הדירה יעדכן 60 יום מראש אם יציע חוזה חדש.<br/>
-7.2 השוכר יגיב תוך 45 יום אם מעוניין בהצעה.</p>
-<p></p><h2><b>8. מיסים ותשלומים שוטפים</b></h2>
-<p>8.1 השוכר:<br/>
-8.1.1 ישלם חשמל, מים, ארנונה, גז ווועד-בית.<br/>
-8.1.2 יעביר חשבונות על שמו תוך 30 יום וימסור אסמכתא.<br/>
-8.1.3 ישלם במועד, ואם לא - בעל הדירה רשאי לשלם במקומו ולדרוש החזר.<br/>
-8.2 בעל הדירה:<br/>
-8.2.1 ישלם מיסים, אגרות והיטלים.<br/>
-8.2.2 ישלם גם תשלומים חריגים שדורש ועד הבית.</p>
-<p></p><h2><b>9. תיקונים ושמירה על הדירה</b></h2>
-<p>9.1 השוכר ישמור על הדירה לפי המצב בפרוטוקול.<br/>
-9.2 בעל הדירה יתקן תקלות שנגרמות מבלאי סביר תוך 30 יום.<br/>
-9.3 אם התקלה מונעת מגורים סבירים – יתקן תוך 3 ימים.<br/>
-9.4 השוכר יתקן תקלות שנגרמו מרשלנותו.<br/>
-9.5 אחריות התיקון לתכולה – בעל הדירה, אלא אם נאמר אחרת.<br/>
-9.6 אם קיימים ליקויים ידועים מראש, יפורטו בנספח ב'.</p>
-<p></p><h2><b>10. שינויים בדירה</b></h2>
-<p>10.1 אין לבצע שינויים בדירה ללא אישור כתוב.<br/>
-10.2 אם נעשו שינויים ללא אישור, בעל הדירה יחליט אם להחזיר המצב לקדמותו או להשאיר את השינויים.</p>
-<p></p><h2><b>11. ביטוח דירה</b></h2>
-<p>11.1 בעל הדירה יבטח את המבנה והמערכות, כולל סעיף ויתור שיבוב כלפי השוכר. ביטוח תכולה וצד ג' – באחריות השוכר.</p>
-<p></p><h2><b>12. העברת זכויות שכירות</b></h2>
-<p>12.1 השכירות אישית ואינה ניתנת להעברה.<br/>
-12.2 ניתן להעביר לשוכר חלופי באישור בכתב של בעל הדירה, בכפוף לקיום תנאים זהים.</p>
-<p></p><h2><b>13. החזרת הדירה</b></h2>
-<p>13.1 בסיום השכירות – הדירה תימסר ריקה ובמצבה המקורי.<br/>
-13.2 כל יום עיכוב בפינוי – פיצוי יומי בגובה פי שלוש מדמי שכירות יומיים. הפיצוי המוסכם: {{lateEvictionPenalty}} ש"ח ליום.</p>
-<p></p><h2><b>14. הפרת החוזה</b></h2>
-<p>14.1 יחול חוק החוזים (תרופות).<br/>
-14.2 הפרות יסודיות:<br/>
-14.2.1 עיכוב של מעל 7 ימים בתשלום.<br/>
-14.2.2 אי פינוי הדירה במועד.<br/>
-14.3 במקרה של הפרה יסודית – ניתן לבטל את החוזה לאחר התראה של 7 ימים.</p>
-<p></p><h2><b>15. בטחונות</b></h2>
-<p>15.1 השוכר יפקיד: {{guarantees}}.<br/>
-15.2 פירוט בטחונות: {{guaranteeAmounts}}.<br/>
-15.3 ערב: {{requireGuarantor}}, סוג: {{guarantorType}}, פרטים: {{guarantorDetails}}</p>
-<p></p><h2><b>16. אי תחולת דיני הגנת הדייר</b></h2>
-<p>16.1 הדירה אינה כפופה לחוק הגנת הדייר.<br/>
-16.2 לא שולמו דמי מפתח, ולא תשולם תמורה נוספת.<br/>
-16.3 שיפוצים או השקעות – לא יקנו זכויות לשוכר.</p>
-<p></p><h2><b>17. כללי</b></h2>
-<p>17.1 בעל הדירה רשאי למכור או לשעבד את זכויותיו, ובלבד שזכויות השוכר יישמרו. בעל הדירה יעדכן את השוכר בפרטי הרוכש.<br/>
-17.2 אין לקזז חובות ללא הסכמה מראש ובכתב.<br/>
-17.3 בעל הדירה רשאי להיכנס לדירה לצרכי תיקונים או הצגה, בתיאום מראש.<br/>
-17.4 חוזה זה מבטל כל הסכמה קודמת, וכל שינוי בו יהיה רק בכתב ובחתימת שני הצדדים.<br/>
-17.5 ויתור זמני אינו מונע תביעה עתידית.<br/>
-17.6 כותרות הסעיפים הן לנוחות בלבד.</p>
-<br>
-<p>ולראיה באו הצדדים על החתום:</p>
-<p>בעל הדירה                        השוכר/ים</p>
-`;
-
-function fillTemplate(template: string, form: Record<string, string>) {
-  // Replace {{fieldName}} with form[fieldName] or a blank if not filled
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
-    if (form[key]) return form[key];
-    // Try to support some legacy/alternate field names for compatibility
-    const altKeys: Record<string, string> = {
-      contractSignDate: form['contractSignDate'] || form['contractDay'] || '',
-      contractSignCity: form['contractSignCity'] || form['contractLocation'] || '',
-      idNumber: form['idNumber'] || form['landlordId'] || '',
-      tenantIdNumber: form['tenantIdNumber'] || form['tenantId'] || '',
-      apartmentDefects: form['apartmentDefects'] || form['defects'] || '',
-    };
-    if (Object.prototype.hasOwnProperty.call(altKeys, key)) return altKeys[key];
-    return "________";
+// Helper to build contract content from only answered clauses
+function buildContractContentFromAnswers(fields: any[], form: Record<string, string>) {
+  console.log('Fields:', fields);
+  let content = '';
+  // Group fields by section (support both 'section' and 'סעיף')
+  const sections: { [key: string]: any[] } = {};
+  fields.forEach((field: any) => {
+    const section = field.section || field["סעיף"] || 'ללא סעיף';
+    if (!sections[section]) sections[section] = [];
+    sections[section].push(field);
   });
+  // Render sections in the order they appear in the fields array
+  let sectionOrder: string[] = [];
+  fields.forEach((field: any) => {
+    const section = field.section || field["סעיף"] || 'ללא סעיף';
+    if (!sectionOrder.includes(section)) sectionOrder.push(section);
+  });
+  // Sort sectionOrder numerically by leading number if present
+  sectionOrder = sectionOrder.sort((a, b) => {
+    const numA = parseInt(((a || '').match(/^\d+/) || [])[0]);
+    const numB = parseInt(((b || '').match(/^\d+/) || [])[0]);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    if (!isNaN(numA)) return -1;
+    if (!isNaN(numB)) return 1;
+    return (a || '').localeCompare((b || ''), 'he');
+  });
+  console.log('Section order after sorting:', sectionOrder);
+  sectionOrder.forEach(section => {
+    const sectionFields = sections[section];
+    // Find the section title (טקסט קבוע with a number, e.g., '4. דמי שכירות ואופן תשלום')
+    const titleIdx = sectionFields.findIndex(f => f["סוג שאלה"] === "טקסט קבוע" && /^\d+\.\s?/.test(f["תוכן"] || f.content || ''));
+    if (titleIdx !== -1) {
+      // Render the section title first
+      const titleField = sectionFields[titleIdx];
+      const contentValue = String(titleField["תוכן"] ?? titleField.content ?? "");
+      const match = contentValue.match(/^(\d+)\.\s*(.+)/);
+      if (match) {
+        content += `<div style=\"font-size:1.2em;font-weight:700;text-align:right;margin:24px 0 16px 0;padding-right:16px;\"><span>${match[1]}.</span> <span>${match[2]}</span></div>`;
+      } else {
+        content += `<div style=\"margin:8px 0;text-align:right;\">${contentValue}</div>`;
+      }
+      // Render all fields after the title, in order, except the title itself
+      sectionFields.forEach((field, idx) => {
+        if (idx === titleIdx) return;
+        if (field["סוג שאלה"] === "טקסט קבוע") {
+          const contentValue = String(field["תוכן"] ?? field.content ?? "");
+          if (contentValue.trim() === 'הסכם שכירות למגורים (שכירות בלתי מוגנת)') {
+            content += `<div style=\"font-size:2.5em;font-weight:800;text-align:center;margin:32px 0 24px 0;\">${contentValue}</div>`;
+          } else {
+            content += `<div style=\"margin:8px 0;text-align:right;\">${contentValue}</div>`;
+          }
+        } else if (field.name) {
+          const answer = form[field.name];
+          let clauseText = field['סעיף רלוונטי בחוזה'] || field.legalText || '';
+          if (field.legalOptions && Array.isArray(field.legalOptions) && field.options && Array.isArray(field.options)) {
+            const idx = field.options.indexOf(answer);
+            if (idx !== -1 && field.legalOptions[idx]) {
+              clauseText = field.legalOptions[idx];
+            }
+          }
+          // If not answered, replace all placeholders with gray 'לא נענה' inline
+          const isAnswered = form.hasOwnProperty(field.name) && form[field.name] !== undefined && form[field.name] !== '';
+          let clauseToRender = clauseText;
+          if (!isAnswered) {
+            clauseToRender = clauseText.replace(/{{[^}]+}}/g, '<span style="color: #888">לא נענה</span>');
+          } else {
+            clauseToRender = fillPlaceholders(clauseText, form);
+          }
+          // Multi-level numbering support (render as nested list if needed)
+          const lines = clauseToRender.split(/\n+/).filter(Boolean);
+          lines.forEach((line: string) => {
+            const mainMatch = line.match(/^(\d+)\.\s*(.*)/);
+            const subMatch = line.match(/^(\d+)\.(\d+)\s*(.*)/);
+            if (mainMatch && !subMatch) {
+              content += `<ol style=\"padding-right:40px;\"><li><div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${mainMatch[2]}</div>`;
+            } else if (subMatch) {
+              content += `<ol style=\"padding-right:32px;\"><li><div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${subMatch[3]}</div></li></ol></li></ol>`;
+            } else {
+              content += `<div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${line}</div>`;
+            }
+          });
+        }
+      });
+    } else {
+      // No numbered title, render all fields in order
+      sectionFields.forEach(field => {
+        if (field["סוג שאלה"] === "טקסט קבוע") {
+          const contentValue = String(field["תוכן"] ?? field.content ?? "");
+          if (contentValue.trim() === 'הסכם שכירות למגורים (שכירות בלתי מוגנת)') {
+            content += `<div style=\"font-size:2em;font-weight:bold;text-align:center;margin:32px 0 24px 0;\">${contentValue}</div>`;
+          } else {
+            content += `<div style=\"margin:8px 0;text-align:right;\">${contentValue}</div>`;
+          }
+        } else if (field.name) {
+          const answer = form[field.name];
+          let clauseText = field['סעיף רלוונטי בחוזה'] || field.legalText || '';
+          if (field.legalOptions && Array.isArray(field.legalOptions) && field.options && Array.isArray(field.options)) {
+            const idx = field.options.indexOf(answer);
+            if (idx !== -1 && field.legalOptions[idx]) {
+              clauseText = field.legalOptions[idx];
+            }
+          }
+          // If not answered, replace all placeholders with gray 'לא נענה' inline
+          const isAnswered = form.hasOwnProperty(field.name) && form[field.name] !== undefined && form[field.name] !== '';
+          let clauseToRender = clauseText;
+          if (!isAnswered) {
+            clauseToRender = clauseText.replace(/{{[^}]+}}/g, '<span style="color: #888">לא נענה</span>');
+          } else {
+            clauseToRender = fillPlaceholders(clauseText, form);
+          }
+          // Multi-level numbering support (render as nested list if needed)
+          const lines = clauseToRender.split(/\n+/).filter(Boolean);
+          lines.forEach((line: string) => {
+            const mainMatch = line.match(/^(\d+)\.\s*(.*)/);
+            const subMatch = line.match(/^(\d+)\.(\d+)\s*(.*)/);
+            if (mainMatch && !subMatch) {
+              content += `<ol style=\"padding-right:40px;\"><li><div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${mainMatch[2]}</div>`;
+            } else if (subMatch) {
+              content += `<ol style=\"padding-right:32px;\"><li><div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${subMatch[3]}</div></li></ol></li></ol>`;
+            } else {
+              content += `<div style=\"text-align:right;${!isAnswered ? 'color:gray;' : ''}\">${line}</div>`;
+            }
+          });
+        }
+      });
+    }
+  });
+  if (!content) {
+    content = '<div style="color:gray;">לא נענו סעיפים להצגה</div>';
+  }
+  return content;
 }
 
-const ContractEditor: FC<ContractEditorProps> = ({ form }) => {
-  const filledContent = fillTemplate(contractTemplate, form);
+export { buildContractContentFromAnswers };
+
+const ContractEditor: FC<ContractEditorProps> = ({ form, questions }) => {
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [showSignDialog, setShowSignDialog] = useState(false);
+  const [signBeforeShare, setSignBeforeShare] = useState<null | boolean>(null);
+  const [signedContent, setSignedContent] = useState<string | null>(null);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string>('');
+  // Support both flat and grouped questions
+  const flatQuestions = Array.isArray(questions[0]?.questions)
+    ? questions.flatMap((g: any) => g.questions)
+    : questions;
+
+  // --- NEW: Merge generalClauses and dynamic questions by section and order ---
+  function buildFullContractContent(generalClauses: any[], dynamicFields: any[], form: Record<string, any>) {
+    // Extract contract title and introduction from dynamicFields
+    const contractTitleField = dynamicFields.find(f => f.name === 'contractTitle' && f["סוג שאלה"] === "טקסט קבוע");
+    const contractIntroField = dynamicFields.find(f => f.name === 'contractIntroduction' && f["סוג שאלה"] === "טקסט קבוע");
+    let content = '';
+    if (contractTitleField) {
+      content += `<div style="font-size:2em;font-weight:bold;text-align:center;margin:32px 0 24px 0;">${contractTitleField["תוכן"]}</div>`;
+    }
+    if (contractIntroField) {
+      content += `<div style="font-size:1.1em;text-align:right;margin:16px 0 24px 0;white-space:pre-line;">${fillPlaceholders(contractIntroField["תוכן"], form)}</div>`;
+    }
+    // Helper to extract all possible keys from a static clause title
+    function extractKeys(title: string): string[] {
+      const keys: string[] = [];
+      if (!title) return keys;
+      keys.push(title.trim());
+      const numMatch = title.match(/^(\d+\.?)/);
+      if (numMatch) keys.push(numMatch[1]);
+      const nameMatch = title.match(/^\d+\.?\s*(.+)$/);
+      if (nameMatch) keys.push(nameMatch[1].trim());
+      return keys;
+    }
+
+    // Build a map of all possible section keys to their static clauses
+    const staticSections: Record<string, {clauses: any[], title: string, idx: number}> = {};
+    generalClauses.forEach((clause: any, idx: number) => {
+      const keys: string[] = extractKeys(clause.title || '');
+      keys.forEach(key => {
+        if (!staticSections[key]) {
+          staticSections[key] = {clauses: [], title: clause.title, idx};
+        }
+        staticSections[key].clauses.push(clause);
+      });
+    });
+
+    // Group dynamic fields by section key
+    const dynamicSections: Record<string, any[]> = {};
+    dynamicFields.forEach((field: any) => {
+      const section = (field["סעיף"] || '').trim();
+      if (!dynamicSections[section]) dynamicSections[section] = [];
+      dynamicSections[section].push(field);
+    });
+
+    // Get all unique section keys in the order they appear in generalClauses
+    const orderedSectionKeys = Object.values(staticSections)
+      .sort((a, b) => a.idx - b.idx)
+      .map(s => s.title);
+
+    // Build the contract content by section
+    let renderedDynamic = new Set();
+
+    orderedSectionKeys.forEach((sectionTitle) => {
+      const sectionKeys = extractKeys(sectionTitle || '');
+      const staticBlock = staticSections[sectionKeys[0]];
+      // Section title
+      if (sectionTitle) {
+        if (sectionTitle === 'הסכם שכירות למגורים (שכירות בלתי-מוגנת)') {
+          content += `<div style="font-size:2em;font-weight:bold;text-align:center;margin:32px 0 24px 0;">${sectionTitle}</div>`;
+        } else {
+          const numberedTitle = sectionTitle.match(/^\d+\.?/);
+          if (numberedTitle) {
+            content += `<div style="font-size:1.1em;text-align:right;margin:24px 0 16px 0;padding-right:16px;font-weight:600;">${sectionTitle}</div>`;
+          } else {
+            content += `<div style="text-align:right;margin:16px 0;font-weight:600;">${sectionTitle}</div>`;
+          }
+        }
+      }
+      // All static clauses for this section (skip the first if it's the title)
+      staticBlock.clauses.forEach((clause: any, i: number) => {
+        if (i === 0 && clause.title) return;
+        if (clause.text) {
+          content += `<div style="font-weight:400;font-size:1em;margin-top:4px;white-space:pre-line;text-align:right;">${fillPlaceholders(clause.text, form)}</div>`;
+        }
+      });
+      // All dynamic clauses for this section (match by any key)
+      sectionKeys.forEach(key => {
+        (dynamicSections[key] || []).forEach((field: any) => {
+          if (field["סוג שאלה"] === "טקסט קבוע") return;
+          renderedDynamic.add(field);
+          let clauseText = field['סעיף רלוונטי בחוזה'] || field.legalText || '';
+          if (field.legalOptions && Array.isArray(field.legalOptions) && field.options && Array.isArray(field.options)) {
+            const answer = form[field.name];
+            const idx = field.options.indexOf(answer);
+            if (idx !== -1 && field.legalOptions[idx]) {
+              clauseText = field.legalOptions[idx];
+            }
+          }
+          let isAnswered = form.hasOwnProperty(field.name) && form[field.name] !== undefined && form[field.name] !== '';
+          let clauseToRender = clauseText;
+          if (!isAnswered) {
+            clauseToRender = clauseText.replace(/{{[^}]+}}/g, '<span style="color: #888">לא נענה</span>');
+          } else {
+            clauseToRender = fillPlaceholders(clauseText, form);
+          }
+          content += `<div style="font-weight:400;font-size:1em;margin-top:4px;white-space:pre-line;text-align:right;${!isAnswered ? 'color:gray;' : ''}">${clauseToRender}</div>`;
+        });
+      });
+    });
+
+    // Render any dynamic clauses that weren't matched to a static section
+    Object.entries(dynamicSections).forEach(([key, fields]) => {
+      fields.forEach((field: any) => {
+        if (renderedDynamic.has(field)) return;
+        if (field["סוג שאלה"] === "טקסט קבוע") return;
+        let clauseText = field['סעיף רלוונטי בחוזה'] || field.legalText || '';
+        if (field.legalOptions && Array.isArray(field.legalOptions) && field.options && Array.isArray(field.options)) {
+          const answer = form[field.name];
+          const idx = field.options.indexOf(answer);
+          if (idx !== -1 && field.legalOptions[idx]) {
+            clauseText = field.legalOptions[idx];
+          }
+        }
+        let isAnswered = form.hasOwnProperty(field.name) && form[field.name] !== undefined && form[field.name] !== '';
+        let clauseToRender = clauseText;
+        if (!isAnswered) {
+          clauseToRender = clauseText.replace(/{{[^}]+}}/g, '<span style="color: #888">לא נענה</span>');
+        } else {
+          clauseToRender = fillPlaceholders(clauseText, form);
+        }
+        content += `<div style="font-weight:400;font-size:1em;margin-top:4px;white-space:pre-line;text-align:right;${!isAnswered ? 'color:gray;' : ''}">${clauseToRender}</div>`;
+      });
+    });
+
+    return content;
+  }
+  // --- END NEW ---
+
+  const contractContent = buildFullContractContent(generalClauses, flatQuestions, form);
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -352,11 +595,101 @@ const ContractEditor: FC<ContractEditorProps> = ({ form }) => {
       HorizontalRule,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
-    content: filledContent,
+    content: contractContent,
+    editorProps: {
+      attributes: {
+        class: 'contract-editor-content',
+        style: 'min-height: 600px; direction: rtl; text-align: right;',
+      },
+    },
   });
 
+  // Helper to add signature image to the contract content
+  function addLandlordSignatureWithImage(html: string, landlordName: string, signatureUrl: string) {
+    if (signatureUrl) {
+      // Insert the signature image under the landlord's name
+      return html.replace(
+        /(<span>\s*{{fullName}}\s*<\/span><br\/>\s*<span style="font-weight: bold;">)_{10,}(<\/span><br\/>\s*בעל הדירה)/,
+        `<span>${landlordName}</span><br/><img src='${signatureUrl}' alt='חתימה' style='max-width:120px;max-height:60px;display:block;margin:8px 0;'/><br/><span style="font-weight: bold;">__________________</span><br/>בעל הדירה`
+      );
+    } else {
+      // Fallback to text signature
+      return html.replace(
+        /(<span>\s*{{fullName}}\s*<\/span><br\/>\s*<span style="font-weight: bold;">)_{10,}(<\/span><br\/>\s*בעל הדירה)/,
+        `<span>${landlordName}</span><br/><span style="font-weight: bold;">חתום</span><br/>בעל הדירה`
+      );
+    }
+  }
+
+  // Helper to generate PDF as Blob (for upload)
+  async function generatePdfBlob(htmlContent: string, signatureImageDataUrl?: string) {
+    const { pdfBlob, metadata } = await generateAndDownloadPdf(htmlContent, signatureImageDataUrl);
+    const formData = new FormData();
+    formData.append('file', pdfBlob, 'contract.pdf');
+    formData.append('metadata', JSON.stringify(metadata));
+    const res = await fetch('/api/share-pdf', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) throw new Error('Failed to upload PDF');
+    const data = await res.json();
+    // Extract the UUID from the returned url (e.g., /contracts/UUID.pdf)
+    const match = data.url.match(/\/contracts\/(.+)\.pdf$/);
+    if (match && match[1]) {
+      const id = match[1];
+      window.open(`/contract-preview/${id}`, '_blank');
+    } else {
+      alert('שגיאה ביצירת קישור שיתוף');
+    }
+  }
+
+  // Shareable link handler
+  async function handleShareLink() {
+    if (!editor) return;
+    setShowSignDialog(true);
+  }
+
+  // Handle dialog actions
+  async function handleDialogAction(sign: boolean) {
+    setSignBeforeShare(sign);
+    if (sign) {
+      setShowSignaturePad(true);
+      setShowSignDialog(false);
+    } else {
+      setShowSignDialog(false);
+      setIsSharing(true);
+      try {
+        if (!editor) throw new Error('Editor not ready');
+        let htmlToShare = editor.getHTML();
+        await generatePdfBlob(htmlToShare, signatureDataUrl);
+      } catch (err) {
+        alert('שגיאה ביצירת קישור שיתוף');
+      } finally {
+        setIsSharing(false);
+      }
+    }
+  }
+
+  // Handle signature pad confirm
+  async function handleSignatureConfirm() {
+    setShowSignaturePad(false);
+    setIsSharing(true);
+    try {
+      if (!editor) throw new Error('Editor not ready');
+      let htmlToShare = editor.getHTML();
+      htmlToShare = addLandlordSignatureWithImage(htmlToShare, form.fullName || '', signatureDataUrl);
+      setSignedContent(htmlToShare);
+      await generatePdfBlob(htmlToShare, signatureDataUrl);
+    } catch (err) {
+      alert('שגיאה ביצירת קישור שיתוף');
+    } finally {
+      setIsSharing(false);
+      setSignatureDataUrl('');
+    }
+  }
+
   return (
-    <div className="tiptap-editor-wrapper flex flex-col">
+    <div className="tiptap-editor-wrapper flex flex-col" style={{ maxWidth: '1000px', width: '100%', margin: '0 auto' }}>
       {/* Compact Google Docs-like Toolbar */}
       <div className="tiptap-toolbar-docs flex flex-wrap items-center gap-1 px-2 py-1 mb-2 rounded-xl shadow-md border border-gray-200 sticky top-0 z-20 min-h-0 h-auto">
         <div className="flex flex-row flex-wrap gap-1 items-center">
@@ -366,17 +699,6 @@ const ContractEditor: FC<ContractEditorProps> = ({ form }) => {
           </button>
           <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().redo().run()} disabled={!editor?.can().chain().focus().redo().run()} title="חזור">
             <Redo2 className="w-4 h-4" />
-          </button>
-          <span className="mx-1 h-5 border-l border-gray-200" />
-          {/* Headings/Paragraph */}
-          <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} disabled={!editor?.can().chain().focus().toggleHeading({ level: 1 }).run()} title="כותרת 1">
-            <Heading1 className="w-4 h-4" />
-          </button>
-          <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} disabled={!editor?.can().chain().focus().toggleHeading({ level: 2 }).run()} title="כותרת 2">
-            <Heading2 className="w-4 h-4" />
-          </button>
-          <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().setParagraph().run()} disabled={!editor?.can().chain().focus().setParagraph().run()} title="פסקה">
-            <Pilcrow className="w-4 h-4" />
           </button>
           <span className="mx-1 h-5 border-l border-gray-200" />
           {/* Bold/Italic/Underline/Strikethrough */}
@@ -402,9 +724,6 @@ const ContractEditor: FC<ContractEditorProps> = ({ form }) => {
           </button>
           <span className="mx-1 h-5 border-l border-gray-200" />
           {/* Blockquote/Horizontal rule */}
-          <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().toggleBlockquote().run()} disabled={!editor?.can().chain().focus().toggleBlockquote().run()} title="ציטוט">
-            <Quote className="w-4 h-4" />
-          </button>
           <button type="button" className="toolbar-btn compact" onClick={() => editor?.chain().focus().setHorizontalRule().run()} disabled={!editor?.can().chain().focus().setHorizontalRule().run()} title="קו אופקי">
             <Minus className="w-4 h-4" />
           </button>
@@ -424,11 +743,60 @@ const ContractEditor: FC<ContractEditorProps> = ({ form }) => {
             <FaFilePdf className="w-4 h-4" />
             <span className="text-xs font-semibold whitespace-nowrap">הורד PDF</span>
           </button>
+          {/* Share Link Button */}
+          <button type="button" className="toolbar-btn compact toolbar-btn-blue flex items-center gap-1" style={{minWidth: '90px', maxWidth: 'none', padding: '0 0.7rem'}} onClick={handleShareLink} title="צור קישור שיתוף">
+            <span className="text-xs font-semibold whitespace-nowrap">קישור שיתוף</span>
+          </button>
         </div>
       </div>
       <div className="tiptap-docs-container rounded-xl shadow-inner p-6 border border-gray-100 flex flex-col" style={{width: '100%', maxWidth: 'none', padding: '1.5rem 0'}}>
-        <EditorContent editor={editor} className="tiptap" style={{width: '100%', maxWidth: 'none', padding: 0}} />
+        {editor && (
+          <EditorContent editor={editor} className="tiptap" style={{width: '100%', maxWidth: 'none', padding: 0}} />
+        )}
       </div>
+      {/* Signature Choice Dialog */}
+      <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>
+        <DialogContent
+          dir="rtl"
+          style={{ textAlign: 'right' }}
+          className="rtl-share-modal"
+        >
+          <DialogHeader style={{ textAlign: 'right' }}>
+            <DialogTitle>האם לחתום על החוזה לפני שיתוף?</DialogTitle>
+            <DialogDescription>
+              תוכל להוסיף חתימה בכתב ידך תחת "בעל הדירה" לפני שיתוף החוזה.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter style={{ justifyContent: 'flex-start' }}>
+            <Button onClick={() => handleDialogAction(true)} disabled={isSharing}>
+              חתום בכתב יד ושתף
+            </Button>
+            <Button variant="outline" onClick={() => handleDialogAction(false)} disabled={isSharing}>
+              שתף ללא חתימה
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Signature Pad Dialog */}
+      <Dialog open={showSignaturePad} onOpenChange={setShowSignaturePad}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>חתום כאן</DialogTitle>
+            <DialogDescription>
+              צייר את חתימתך. תוכל לנקות ולנסות שוב במידת הצורך.
+            </DialogDescription>
+          </DialogHeader>
+          <SignaturePad onEnd={setSignatureDataUrl} />
+          <DialogFooter>
+            <Button onClick={handleSignatureConfirm} disabled={!signatureDataUrl || isSharing}>
+              אשר חתימה ושתף
+            </Button>
+            <Button variant="outline" onClick={() => setShowSignaturePad(false)} disabled={isSharing}>
+              ביטול
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
