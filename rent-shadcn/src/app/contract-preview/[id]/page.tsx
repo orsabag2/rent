@@ -1,11 +1,6 @@
-import React from "react";
 import ContractPreviewClient from './ContractPreviewClient';
 
-interface ContractPreviewPageProps {
-  params: { id: string };
-}
-
-export default function ContractPreviewPage({ params }: ContractPreviewPageProps) {
+export default function Page({ params }: { params: { id: string } }) {
   return <ContractPreviewClient id={params.id} />;
 }
 
