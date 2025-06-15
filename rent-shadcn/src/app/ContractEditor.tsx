@@ -322,8 +322,8 @@ function buildContractContentFromAnswers(fields: any[], form: Record<string, str
   });
   // Sort sectionOrder numerically by leading number if present
   sectionOrder = sectionOrder.sort((a, b) => {
-    const numA = parseInt(((a || '').match(/^\d+/) || [])[0]);
-    const numB = parseInt(((b || '').match(/^\d+/) || [])[0]);
+    const numA = parseInt((typeof a === 'string' ? a : '').match(/^[0-9]+/)?.[0] ?? '');
+    const numB = parseInt((typeof b === 'string' ? b : '').match(/^[0-9]+/)?.[0] ?? '');
     if (!isNaN(numA) && !isNaN(numB)) {
       return numA - numB;
     }
